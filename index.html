@@ -114,7 +114,7 @@
        }
 
        .exercise-title {
-           font-size: 19px;
+           font-size: 23px;
            font-weight: 600;
            color: #1d1d1f;
            margin-bottom: 14px;
@@ -131,7 +131,7 @@
        }
 
        .weight-label {
-           font-size: 15px;
+           font-size: 19px;
            font-weight: 500;
            color: rgba(60, 60, 67, 0.8);
            letter-spacing: 0.2px;
@@ -141,7 +141,7 @@
            width: 75px;
            padding: 8px 12px;
            border: 1.5px solid rgba(0, 0, 0, 0.12);
-           background: #fafafa;
+           background: #ffffff;
            border-radius: 8px;
            font-size: 15px;
            font-weight: 600;
@@ -153,9 +153,9 @@
        }
 
        .weight-input-inline::placeholder {
-           color: rgba(60, 60, 67, 0.3);
+           color: rgba(60, 60, 67, 0.6);
            font-size: 13px;
-           font-weight: 400;
+           font-weight: 500;
        }
 
        .weight-input-inline:focus {
@@ -187,7 +187,7 @@
        }
 
        .set-label {
-           font-size: 15px;
+           font-size: 19px;
            font-weight: 500;
            color: rgba(60, 60, 67, 0.8);
            margin-bottom: 12px;
@@ -208,7 +208,7 @@
        .timer-display.countdown {
            font-size: 72px;
            font-weight: 600;
-           color: #ff9500;
+           color: #ff3b30;
        }
 
        .timer-btn {
@@ -449,7 +449,7 @@
    <div class="container">
        <div class="header">
            <h1>Josh's Simple Gains</h1>
-           <p>Target: 40-70 seconds per set</p>
+           <p>Time Under Tension Training</p>
        </div>
 
        <div class="workout-selector">
@@ -483,7 +483,6 @@
        let timers = {};
 
        function initApp() {
-           // Set up button listeners first
            const buttons = document.querySelectorAll('.workout-btn');
            
            buttons.forEach(btn => {
@@ -493,21 +492,13 @@
                    
                    const workoutNum = parseInt(this.getAttribute('data-workout'));
                    
-                   // Remove active from all buttons
                    buttons.forEach(b => b.classList.remove('active'));
-                   
-                   // Add active to clicked button
                    this.classList.add('active');
-                   
-                   // Update current workout
                    currentWorkout = workoutNum;
-                   
-                   // Load workout
                    loadWorkout(workoutNum);
                });
            });
            
-           // Load initial workout after a short delay
            setTimeout(() => {
                loadWorkout(1);
            }, 100);
@@ -524,10 +515,8 @@
                return;
            }
            
-           // Clear existing content
            content.innerHTML = '';
            
-           // Update button states
            document.querySelectorAll('.workout-btn').forEach(btn => {
                const btnWorkout = parseInt(btn.getAttribute('data-workout'));
                if (btnWorkout === workoutNum) {
@@ -556,7 +545,6 @@
                exerciseHTML += '<span id="ready-badge-' + idx + '" class="ready-badge" style="display: none;"></span>';
                exerciseHTML += '</div>';
 
-               // Add sets
                for (let setNum = 1; setNum <= 2; setNum++) {
                    exerciseHTML += '<div class="set-container">';
                    exerciseHTML += '<div class="set-label">Set ' + setNum + '</div>';
@@ -571,16 +559,13 @@
                htmlParts.push(exerciseHTML);
            });
 
-           // Add report link
            htmlParts.push('<div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);"><a href="#" id="reportLink" style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color=\'#ffffff\'" onmouseout="this.style.color=\'rgba(255, 255, 255, 0.6)\'">Download Progress Report</a></div>');
 
            const finalHTML = htmlParts.join('');
            content.innerHTML = finalHTML;
 
-           // Load saved data
            loadSavedData(workoutNum);
 
-           // Add event listeners to timer buttons
            content.querySelectorAll('.timer-btn').forEach(function(btn) {
                btn.addEventListener('click', function(e) {
                    e.preventDefault();
@@ -590,7 +575,6 @@
                });
            });
 
-           // Add event listeners to hide ready badge when weight is manually changed
            workout.exercises.forEach((exercise, idx) => {
                const weightInput = document.getElementById('weight-' + idx);
                const readyBadge = document.getElementById('ready-badge-' + idx);
@@ -602,7 +586,6 @@
                }
            });
            
-           // Add event listener to report link
            const reportLink = document.getElementById('reportLink');
            if (reportLink) {
                reportLink.addEventListener('click', function(e) {
@@ -620,7 +603,6 @@
                return;
            }
 
-           // Analyze data
            const allExercises = [...new Set(history.map(h => h.exercise))];
            const reportData = [];
            const today = new Date();
@@ -634,7 +616,6 @@
 
                if (exerciseHistory.length === 0) return;
 
-               // Get all valid workouts (both sets in range)
                const validWorkouts = exerciseHistory.filter(entry =>
                    entry.sets.length === 2 &&
                    entry.sets.every(set => set.time >= 40 && set.time <= 70)
@@ -646,7 +627,6 @@
                    ? Math.max(...validWorkouts.map(w => w.sets[0].weight))
                    : 0;
 
-               // Check for plateau (same weight for 3+ consecutive workouts)
                let plateauCount = 0;
                if (exerciseHistory.length >= 3) {
                    const lastThree = exerciseHistory.slice(-3);
@@ -656,12 +636,10 @@
                    }
                }
 
-               // Recent activity
                const recentWorkouts = exerciseHistory.filter(e =>
                    new Date(e.date) >= fourWeeksAgo
                );
 
-               // Success rate (sets in target range)
                const allSets = exerciseHistory.flatMap(e => e.sets);
                const successfulSets = allSets.filter(s => s.time >= 40 && s.time <= 70).length;
                const successRate = Math.round((successfulSets / allSets.length) * 100);
@@ -682,7 +660,6 @@
                });
            });
 
-           // Generate HTML report
            let reportHTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -770,7 +747,6 @@
 </body>
 </html>`;
 
-           // Create and download
            const blob = new Blob([reportHTML], { type: 'text/html' });
            const url = URL.createObjectURL(blob);
            const a = document.createElement('a');
@@ -787,24 +763,19 @@
            const timerDisplay = document.getElementById('timer-' + timerId);
            const timeInput = document.getElementById('time-' + timerId);
 
-           // Don't allow interaction if button is in 'done' state
            if (btn && btn.classList.contains('done')) {
                return;
            }
 
            if (timers[timerId]) {
-               // Stop timer - auto-save
                clearInterval(timers[timerId].interval);
                delete timers[timerId];
                
-               // Keep timer display visible - don't reset
                timerDisplay.classList.remove('countdown');
                
-               // Button stays grey and says Done
                btn.textContent = 'Done';
                btn.className = 'timer-btn done';
 
-               // Auto-save
                const workout = workouts[currentWorkout];
                const exerciseName = workout.exercises[exerciseIdx];
                const weight = document.getElementById('weight-' + exerciseIdx).value;
@@ -856,32 +827,22 @@
                        // localStorage not available
                    }
 
-                   // Show feedback
-                   const statusDiv = document.getElementById('status-' + exerciseIdx + '-' + setNum);
-                   if (statusDiv) {
-                       const timeVal = parseInt(time);
-                       if (timeVal >= 70) {
-                           statusDiv.className = 'status success';
-                           statusDiv.textContent = '✓ Saved! Great time!';
-                       } else if (timeVal >= 40) {
-                           statusDiv.className = 'status success';
-                           statusDiv.textContent = '✓ Saved!';
-                       } else {
-                           statusDiv.className = 'status warning';
-                           statusDiv.textContent = '✓ Saved';
+                   const readyBadge = document.getElementById('ready-badge-' + exerciseIdx);
+                   const weightInput = document.getElementById('weight-' + exerciseIdx);
+                   
+                   if (readyBadge && weightInput) {
+                       const bothSetsOver70 = existingEntry && existingEntry.sets.length === 2 && 
+                                             existingEntry.sets.every(function(s) { return s.time >= 70; });
+                       
+                       if (bothSetsOver70 && existingEntry.date === today) {
+                           readyBadge.textContent = 'Ready to increase! You hit 70+ seconds on both sets last time';
+                           readyBadge.style.display = 'inline-block';
+                           weightInput.style.background = 'rgba(52, 168, 83, 0.08)';
                        }
-                       setTimeout(function() {
-                           statusDiv.textContent = '';
-                           statusDiv.className = '';
-                       }, 2000);
                    }
-
-                   // Reload to update badge
-                   loadWorkout(currentWorkout);
                }
            } else {
-               // Start countdown
-               let countdown = 5;
+               let countdown = 3;
                timerDisplay.classList.add('countdown');
                timerDisplay.textContent = countdown;
                btn.textContent = 'Starting...';
@@ -889,18 +850,15 @@
                
                const countdownInterval = setInterval(function() {
                    countdown--;
-                   if (countdown > 0) {
+                   if (countdown >= 0) {
                        timerDisplay.textContent = countdown;
-                   } else if (countdown === 0) {
-                       timerDisplay.textContent = 'GO!';
                    } else {
-                       // Countdown done, start actual timer
                        clearInterval(countdownInterval);
                        timerDisplay.classList.remove('countdown');
-                       timerDisplay.textContent = '00:00';
-                       timeInput.value = 0;
+                       timerDisplay.textContent = '00:01';
+                       timeInput.value = 1;
                        
-                       const startTime = Date.now();
+                       const startTime = Date.now() - 1000;
                        
                        timers[timerId] = {
                            interval: setInterval(function() {
@@ -911,7 +869,6 @@
                                const secs = elapsed % 60;
                                timerDisplay.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
 
-                               // Alarm at 150 seconds
                                if (elapsed === 150) {
                                    if (navigator.vibrate) {
                                        navigator.vibrate([200, 100, 200, 100, 200]);
@@ -926,7 +883,6 @@
            }
        }
 
-
        function loadSavedData(workoutNum) {
            const workout = workouts[workoutNum];
            const today = new Date().toISOString().split('T')[0];
@@ -937,7 +893,6 @@
                return;
            }
 
-           // Get last workout data for each exercise
            workout.exercises.forEach((exercise, idx) => {
                const lastEntry = history
                    .filter(function(h) { return h.exercise === exercise && h.workout === workout.name; })
@@ -950,15 +905,12 @@
                    if (weightInput) {
                        const lastWeight = lastEntry.sets[0].weight;
                        
-                       // Always set to last workout weight (don't auto-increment)
                        weightInput.value = lastWeight;
                        
-                       // Check if BOTH sets hit 70+ seconds
                        const bothSetsOver70 = lastEntry.sets.length === 2 && 
                                              lastEntry.sets.every(function(set) { return set.time >= 70; });
                        
                        if (bothSetsOver70 && readyBadge) {
-                           // Check if this is from today - if so, don't show badge (already did the increase)
                            const isToday = lastEntry.date === today;
                            
                            if (!isToday) {
@@ -972,8 +924,6 @@
            });
        }
 
-
-       // Initialize app - use DOMContentLoaded for better iOS compatibility
        if (document.readyState === 'loading') {
            document.addEventListener('DOMContentLoaded', initApp);
        } else {
