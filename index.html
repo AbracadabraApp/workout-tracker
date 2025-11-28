@@ -63,6 +63,35 @@
 
        let currentWorkout = 1;
        let timers = {};
+       let audioCtx = null;
+
+       function getAudioContext() {
+           if (!audioCtx) {
+               audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+           }
+           if (audioCtx.state === 'suspended') {
+               audioCtx.resume();
+           }
+           return audioCtx;
+       }
+
+       function playBeep(freq, duration) {
+           try {
+               const ctx = getAudioContext();
+               const osc = ctx.createOscillator();
+               const gain = ctx.createGain();
+               osc.connect(gain);
+               gain.connect(ctx.destination);
+               osc.frequency.value = freq;
+               osc.type = 'sine';
+               gain.gain.setValueAtTime(0.5, ctx.currentTime);
+               gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+               osc.start(ctx.currentTime);
+               osc.stop(ctx.currentTime + duration / 1000);
+           } catch (e) {
+               console.log('Audio error:', e);
+           }
+       }
 
        function initApp() {
            loadWorkout(1);
@@ -152,22 +181,6 @@
            });
        }
 
-       function playBeep(freq, duration) {
-           try {
-               const ctx = new (window.AudioContext || window.webkitAudioContext)();
-               const osc = ctx.createOscillator();
-               const gain = ctx.createGain();
-               osc.connect(gain);
-               gain.connect(ctx.destination);
-               osc.frequency.value = freq;
-               osc.type = 'sine';
-               gain.gain.setValueAtTime(0.3, ctx.currentTime);
-               gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
-               osc.start(ctx.currentTime);
-               osc.stop(ctx.currentTime + duration / 1000);
-           } catch (e) {}
-       }
-
        function startTimer(exerciseIdx) {
            const timerId = `${exerciseIdx}`;
            const timerDisplay = document.getElementById(`timer-${timerId}`);
@@ -210,6 +223,7 @@
                        });
                    }
                    localStorage.setItem('workoutHistory', JSON.stringify(history));
+                   updateHistorySection();
 
                    const statusDiv = document.getElementById(`status-${exerciseIdx}`);
                    if (statusDiv) {
