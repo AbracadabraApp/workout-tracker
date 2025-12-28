@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Josh's Simple Gains</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: #000;
+            min-height: 100vh;
+            padding: 16px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #1d1d1f 0%, #121212 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%);
+            color: #fff;
+            padding: 28px 24px 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .workout-selector {
+            display: flex;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px;
+            gap: 6px;
+        }
+
+        .workout-btn {
+            flex: 1;
+            padding: 14px 10px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        .workout-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .content {
+            padding: 16px;
+        }
+
+        .exercise-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+            color: #1d1d1f;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .exercise-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .ready-badge {
+            background: linear-gradient(135deg, #34a853 0%, #2d9648 100%);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .sets-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .set-box {
+            flex: 1;
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .set-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(60, 60, 67, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .weight-input {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px solid rgba(0, 0, 0, 0.12);
+            background: #fff;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .weight-input::placeholder {
+            color: rgba(60, 60, 67, 0.4);
+            font-weight: 400;
+        }
+
+        .weight-input:focus {
+            outline: none;
+            border-color: #1d1d1f;
+        }
+
+        .timer-display {
+            font-size: 42px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 10px;
+            color: #1d1d1f;
+        }
+
+        .timer-display.countdown {
+            color: #ff9500;
+        }
+
+        .timer-display.success {
+            color: #34a853;
+        }
+
+        .timer-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn.go {
+            background: #34a853;
+            color: #fff;
+        }
+
+        .timer-btn.go:disabled {
+            background: #ccc;
+            color: #666;
+        }
+
+        .timer-btn.stop {
+            background: #ff3b30;
+            color: #fff;
+        }
+
+        .timer-btn.completed {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .timer-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .rest-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .rest-overlay.show {
+            display: flex;
+        }
+
+        .rest-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .rest-timer {
+            font-size: 72px;
+            font-weight: 700;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rest-skip {
+            margin-top: 40px;
+            padding: 16px 48px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .history-section {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0 0 24px 24px;
+        }
+
+        .history-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .history-content {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .history-date {
+            color: #fff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Josh's Simple Gains</h1>
+            <p>Target: 40-70 seconds per set</p>
+        </div>
+
+        <div class="workout-selector" id="workoutSelector"></div>
+
+        <div class="content" id="workoutContent"></div>
+
+        <div class="history-section">
+            <div class="history-title">History</div>
+            <div class="history-content" id="historyContent"></div>
+        </div>
+    </div>
+
+    <div class="rest-overlay" id="restOverlay">
+        <div class="rest-title">Rest</div>
+        <div class="rest-timer" id="restTimer">90</div>
+        <button class="rest-skip" onclick="skipRest()">Skip</button>
+    </div>
+
+    <script>
+        const workouts = {
+            A: {
+                name: "Day A",
+                label: "Mon",
+                exercises: [
+                    { name: "Incline Press", increment: 2.5 },
+                    { name: "Chest-Supported Row", increment: 2.5 },
+                    { name: "Pullover", increment: 2.5 },
+                    { name: "Trap Bar Deadlift", increment: 5 },
+                    { name: "Trap Bar Shrug", increment: 5 }
+                ]
+            },
+            B: {
+                name: "Day B",
+                label: "Wed",
+                exercises: [
+                    { name: "Overhead Press", increment: 2.5 },
+                    { name: "Single-Arm Row", increment: 2.5 },
+                    { name: "Pullover", increment: 2.5 },
+                    { name: "Goblet Squat", increment: 5 },
+                    { name: "Curl", increment: 2.5 }
+                ]
+            },
+            C: {
+                name: "Day C",
+                label: "Fri",
+                exercises: [
+                    { name: "Bench Press", increment: 2.5 },
+                    { name: "Reverse Fly", increment: 2.5 },
+                    { name: "Pullover", increment: 2.5 },
+                    { name: "DB Romanian Deadlift", increment: 2.5 },
+                    { name: "Skull Crusher", increment: 2.5 }
+                ]
+            }
+        };
+
+        let currentWorkout = 'A';
+        let timers = {};
+        let restInterval = null;
+        let audioContext = null;
+
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
+
+        function beep(frequency = 800, duration = 150, count = 1) {
+            const ctx = getAudioContext();
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+                    oscillator.start(ctx.currentTime);
+                    oscillator.stop(ctx.currentTime + duration / 1000);
+                }, i * 200);
+            }
+        }
+
+        function initApp() {
+            renderWorkoutSelector();
+            loadWorkout(currentWorkout);
+            document.body.addEventListener('touchstart', () => getAudioContext(), { once: true });
+            document.body.addEventListener('click', () => getAudioContext(), { once: true });
+        }
+
+        function renderWorkoutSelector() {
+            const selector = document.getElementById('workoutSelector');
+            selector.innerHTML = Object.keys(workouts).map(key => `
+                <button class="workout-btn ${key === currentWorkout ? 'active' : ''}" 
+                        onclick="loadWorkout('${key}')">
+                    ${workouts[key].label}<br>${workouts[key].name}
+                </button>
+            `).join('');
+        }
+
+        function loadWorkout(workoutKey) {
+            currentWorkout = workoutKey;
+            const workout = workouts[workoutKey];
+            const content = document.getElementById('workoutContent');
+            const history = JSON.parse(localStorage.getItem('simpleGainsHistory') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+
+            document.querySelectorAll('.workout-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', Object.keys(workouts)[i] === workoutKey);
+            });
+
+            let html = '';
+            workout.exercises.forEach((exercise, idx) => {
+                const lastEntry = history
+                    .filter(h => h.exercise === exercise.name && h.workout === workoutKey && h.date !== today)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+                let suggestedWeight = '';
+                let showReady = false;
+
+                if (lastEntry) {
+                    if (lastEntry.time1 >= 70 && lastEntry.time2 >= 70) {
+                        suggestedWeight = lastEntry.weight + exercise.increment;
+                        showReady = true;
+                    } else {
+                        suggestedWeight = lastEntry.weight;
+                    }
+                }
+
+                const todayEntry = history.find(h => 
+                    h.exercise === exercise.name && h.workout === workoutKey && h.date === today
+                );
+
+                html += `
+                    <div class="exercise-card" id="card-${idx}">
+                        <div class="exercise-header">
+                            <div class="exercise-title">${exercise.name}</div>
+                            ${showReady && !todayEntry ? '<div class="ready-badge">↑ Ready!</div>' : ''}
+                        </div>
+                        <div class="sets-container">
+                            <div class="set-box">
+                                <div class="set-label">Set 1</div>
+                                <input type="number" class="weight-input" id="weight-${idx}-1" 
+                                       placeholder="lbs" value="${todayEntry ? todayEntry.weight : suggestedWeight}"
+                                       onchange="onWeightChange(${idx}, 1)" oninput="updateGoButton(${idx}, 1)"
+                                       ${todayEntry ? 'disabled' : ''}>
+                                <div class="timer-display" id="timer-${idx}-1">${todayEntry ? formatTime(todayEntry.time1) : '00:00'}</div>
+                                <button class="timer-btn ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-1" 
+                                        onclick="handleTimer(${idx}, 1)"
+                                        ${todayEntry ? 'disabled' : ''}>
+                                    ${todayEntry ? 'Completed' : 'Enter Weight'}
+                                </button>
+                            </div>
+                            <div class="set-box">
+                                <div class="set-label">Set 2</div>
+                                <input type="number" class="weight-input" id="weight-${idx}-2" 
+                                       placeholder="lbs" value="${todayEntry ? todayEntry.weight : ''}"
+                                       oninput="updateGoButton(${idx}, 2)"
+                                       ${todayEntry ? 'disabled' : ''}>
+                                <div class="timer-display" id="timer-${idx}-2">${todayEntry ? formatTime(todayEntry.time2) : '00:00'}</div>
+                                <button class="timer-btn ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-2" 
+                                        onclick="handleTimer(${idx}, 2)"
+                                        ${todayEntry ? 'disabled' : ''}>
+                                    ${todayEntry ? 'Completed' : 'Enter Weight'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html;
+            
+            // Initialize button states
+            workout.exercises.forEach((ex, idx) => {
+                updateGoButton(idx, 1);
+                updateGoButton(idx, 2);
+            });
+            
+            renderHistory();
+        }
+
+        function onWeightChange(exerciseIdx, setNum) {
+            if (setNum === 1) {
+                const weight1 = document.getElementById(`weight-${exerciseIdx}-1`).value;
+                const weight2Input = document.getElementById(`weight-${exerciseIdx}-2`);
+                if (!weight2Input.value) {
+                    weight2Input.value = weight1;
+                    updateGoButton(exerciseIdx, 2);
+                }
+            }
+        }
+
+        function updateGoButton(exerciseIdx, setNum) {
+            const weightInput = document.getElementById(`weight-${exerciseIdx}-${setNum}`);
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setNum}`);
+            
+            if (btn.classList.contains('completed') || btn.classList.contains('stop')) return;
+            
+            if (weightInput.value && parseFloat(weightInput.value) > 0) {
+                btn.textContent = 'Go';
+                btn.disabled = false;
+            } else {
+                btn.textContent = 'Enter Weight';
+                btn.disabled = true;
+            }
+        }
+
+        function handleTimer(exerciseIdx, setNum) {
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setNum}`);
+            const timerKey = `${exerciseIdx}-${setNum}`;
+            
+            if (timers[timerKey]) {
+                stopTimer(exerciseIdx, setNum);
+            } else {
+                startCountdown(exerciseIdx, setNum);
+            }
+        }
+
+        function startCountdown(exerciseIdx, setNum) {
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setNum}`);
+            const display = document.getElementById(`timer-${exerciseIdx}-${setNum}`);
+            const weightInput = document.getElementById(`weight-${exerciseIdx}-${setNum}`);
+            let countdown = 5;
+
+            weightInput.disabled = true;
+            display.textContent = countdown;
+            display.classList.add('countdown');
+            btn.textContent = 'Ready...';
+            btn.disabled = true;
+            btn.classList.remove('go');
+            beep(600, 150);
+
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    display.textContent = countdown;
+                    beep(600, 150);
+                } else {
+                    clearInterval(countdownInterval);
+                    display.classList.remove('countdown');
+                    beep(1000, 300);
+                    startTimer(exerciseIdx, setNum);
+                }
+            }, 1000);
+        }
+
+        function startTimer(exerciseIdx, setNum) {
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setNum}`);
+            const display = document.getElementById(`timer-${exerciseIdx}-${setNum}`);
+            const timerKey = `${exerciseIdx}-${setNum}`;
+            let seconds = 0;
+            let beeped70 = false;
+
+            btn.disabled = false;
+            btn.textContent = 'Stop';
+            btn.classList.add('stop');
+
+            const interval = setInterval(() => {
+                seconds++;
+                display.textContent = formatTime(seconds);
+
+                if (seconds === 70 && !beeped70) {
+                    beeped70 = true;
+                    display.classList.add('success');
+                    beep(1000, 200, 3);
+                }
+            }, 1000);
+
+            timers[timerKey] = { interval, getSeconds: () => seconds };
+        }
+
+        function stopTimer(exerciseIdx, setNum) {
+            const timerKey = `${exerciseIdx}-${setNum}`;
+            const timerObj = timers[timerKey];
+            const seconds = timerObj.getSeconds();
+            clearInterval(timerObj.interval);
+            delete timers[timerKey];
+
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setNum}`);
+            btn.textContent = 'Completed';
+            btn.classList.remove('stop');
+            btn.classList.add('completed');
+            btn.disabled = true;
+
+            // Copy weight to Set 2 if this was Set 1
+            if (setNum === 1) {
+                const weight1 = document.getElementById(`weight-${exerciseIdx}-1`).value;
+                const weight2Input = document.getElementById(`weight-${exerciseIdx}-2`);
+                if (!weight2Input.value) {
+                    weight2Input.value = weight1;
+                    updateGoButton(exerciseIdx, 2);
+                }
+            }
+
+            // Save if Set 2 is complete
+            if (setNum === 2) {
+                saveExercise(exerciseIdx);
+            }
+
+            showRestOverlay();
+        }
+
+        function saveExercise(exerciseIdx) {
+            const workout = workouts[currentWorkout];
+            const exercise = workout.exercises[exerciseIdx];
+            const weight = parseFloat(document.getElementById(`weight-${exerciseIdx}-1`).value) || 0;
+            const timer1 = document.getElementById(`timer-${exerciseIdx}-1`).textContent;
+            const timer2 = document.getElementById(`timer-${exerciseIdx}-2`).textContent;
+            const time1 = parseTime(timer1);
+            const time2 = parseTime(timer2);
+
+            const entry = {
+                date: new Date().toISOString().split('T')[0],
+                workout: currentWorkout,
+                exercise: exercise.name,
+                weight: weight,
+                time1: time1,
+                time2: time2
+            };
+
+            const history = JSON.parse(localStorage.getItem('simpleGainsHistory') || '[]');
+            
+            // Remove existing entry for same exercise/workout/date
+            const filtered = history.filter(h => 
+                !(h.exercise === exercise.name && h.workout === currentWorkout && h.date === entry.date)
+            );
+            filtered.push(entry);
+            localStorage.setItem('simpleGainsHistory', JSON.stringify(filtered));
+            renderHistory();
+        }
+
+        function parseTime(timeStr) {
+            const parts = timeStr.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+
+        function showRestOverlay() {
+            const overlay = document.getElementById('restOverlay');
+            const timerDisplay = document.getElementById('restTimer');
+            let restSeconds = 90;
+
+            overlay.classList.add('show');
+            timerDisplay.textContent = restSeconds;
+
+            restInterval = setInterval(() => {
+                restSeconds--;
+                timerDisplay.textContent = restSeconds;
+
+                if (restSeconds <= 0) {
+                    skipRest();
+                    beep(800, 200, 2);
+                }
+            }, 1000);
+        }
+
+        function skipRest() {
+            clearInterval(restInterval);
+            document.getElementById('restOverlay').classList.remove('show');
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function renderHistory() {
+            const historyContent = document.getElementById('historyContent');
+            const history = JSON.parse(localStorage.getItem('simpleGainsHistory') || '[]');
+            
+            // Filter to current workout and sort by date desc
+            const workoutHistory = history
+                .filter(h => h.workout === currentWorkout)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Group by date
+            const byDate = {};
+            workoutHistory.forEach(entry => {
+                if (!byDate[entry.date]) byDate[entry.date] = [];
+                byDate[entry.date].push(entry);
+            });
+
+            let html = '';
+            const dates = Object.keys(byDate).slice(0, 5); // Last 5 sessions
+            
+            dates.forEach((date, i) => {
+                const dateObj = new Date(date + 'T12:00:00');
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                html += `<span class="history-date">${dateStr}</span>\n`;
+                
+                byDate[date].forEach(entry => {
+                    html += `${entry.exercise}: ${entry.weight}lb → ${entry.time1}s, ${entry.time2}s\n`;
+                });
+                
+                if (i < dates.length - 1) html += '\n';
+            });
+
+            historyContent.innerHTML = html || 'No history yet';
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
