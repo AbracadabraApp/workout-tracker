@@ -1,0 +1,883 @@
+Got it. Let me update the code with:
+
+1. **Weight inheritance fix** - Set 2 inherits as you type
+2. **Unilateral exercise support** - Single-Arm Row gets L/R layout
+3. **Smart rest for unilateral** - Rest only after both sides complete (not between L/R)
+4. **History format** - Shows all 4 times for unilateral exercises
+
+Give me a moment to output the full updated code...
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Josh's Simple Gains</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: #000;
+            min-height: 100vh;
+            padding: 16px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #1d1d1f 0%, #121212 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%);
+            color: #fff;
+            padding: 28px 24px 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .workout-selector {
+            display: flex;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px;
+            gap: 6px;
+        }
+
+        .workout-btn {
+            flex: 1;
+            padding: 14px 10px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        .workout-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .content {
+            padding: 16px;
+        }
+
+        .exercise-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 12px;
+            color: #1d1d1f;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .exercise-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .ready-badge {
+            background: linear-gradient(135deg, #34a853 0%, #2d9648 100%);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .weight-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .weight-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(60, 60, 67, 0.8);
+        }
+
+        .weight-input {
+            width: 80px;
+            padding: 10px;
+            border: 1.5px solid rgba(0, 0, 0, 0.12);
+            background: #fff;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-align: center;
+        }
+
+        .weight-input::placeholder {
+            color: rgba(60, 60, 67, 0.4);
+            font-weight: 400;
+        }
+
+        .weight-input:focus {
+            outline: none;
+            border-color: #1d1d1f;
+        }
+
+        .sets-container {
+            display: flex;
+            gap: 12px;
+        }
+
+        .set-box {
+            flex: 1;
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .set-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(60, 60, 67, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .set-row {
+            margin-bottom: 14px;
+        }
+
+        .set-row-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(60, 60, 67, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .lr-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lr-box {
+            flex: 1;
+            background: #f5f5f7;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .lr-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(60, 60, 67, 0.5);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .timer-display {
+            font-size: 42px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 10px;
+            color: #1d1d1f;
+        }
+
+        .timer-display.small {
+            font-size: 32px;
+        }
+
+        .timer-display.countdown {
+            color: #ff9500;
+        }
+
+        .timer-display.success {
+            color: #34a853;
+        }
+
+        .timer-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn.small {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .timer-btn.go {
+            background: #34a853;
+            color: #fff;
+        }
+
+        .timer-btn.go:disabled {
+            background: #ccc;
+            color: #666;
+        }
+
+        .timer-btn.stop {
+            background: #ff3b30;
+            color: #fff;
+        }
+
+        .timer-btn.completed {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .timer-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .rest-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .rest-overlay.show {
+            display: flex;
+        }
+
+        .rest-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .rest-timer {
+            font-size: 72px;
+            font-weight: 700;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rest-skip {
+            margin-top: 40px;
+            padding: 16px 48px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .history-section {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0 0 24px 24px;
+        }
+
+        .history-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .history-content {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        .history-date {
+            color: #fff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Josh's Simple Gains</h1>
+            <p>Target: 40-70 seconds per set</p>
+        </div>
+
+        <div class="workout-selector" id="workoutSelector"></div>
+
+        <div class="content" id="workoutContent"></div>
+
+        <div class="history-section">
+            <div class="history-title">History</div>
+            <div class="history-content" id="historyContent"></div>
+        </div>
+    </div>
+
+    <div class="rest-overlay" id="restOverlay">
+        <div class="rest-title">Rest</div>
+        <div class="rest-timer" id="restTimer">90</div>
+        <button class="rest-skip" onclick="skipRest()">Skip</button>
+    </div>
+
+    <script>
+        const workouts = {
+            A: {
+                name: "Day A",
+                label: "Mon",
+                exercises: [
+                    { name: "Incline Press", increment: 2.5 },
+                    { name: "Chest-Supported Row", increment: 2.5 },
+                    { name: "Pullover", increment: 2.5 },
+                    { name: "Trap Bar Deadlift", increment: 5 },
+                    { name: "Trap Bar Shrug", increment: 5 }
+                ]
+            },
+            B: {
+                name: "Day B",
+                label: "Wed",
+                exercises: [
+                    { name: "Overhead Press", increment: 2.5 },
+                    { name: "Single-Arm Row", increment: 2.5, unilateral: true },
+                    { name: "Pullover", increment: 2.5 },
+                    { name: "Goblet Squat", increment: 5 },
+                    { name: "Curl", increment: 2.5 }
+                ]
+            },
+            C: {
+                name: "Day C",
+                label: "Fri",
+                exercises: [
+                    { name: "Bench Press", increment: 2.5 },
+                    { name: "Reverse Fly", increment: 2.5 },
+                    { name: "Pullover", increment: 2.5 },
+                    { name: "DB Romanian Deadlift", increment: 2.5 },
+                    { name: "Skull Crusher", increment: 2.5 }
+                ]
+            }
+        };
+
+        let currentWorkout = 'A';
+        let timers = {};
+        let restInterval = null;
+        let audioContext = null;
+
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
+
+        function beep(frequency = 800, duration = 150, count = 1) {
+            const ctx = getAudioContext();
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+                    oscillator.start(ctx.currentTime);
+                    oscillator.stop(ctx.currentTime + duration / 1000);
+                }, i * 200);
+            }
+        }
+
+        function initApp() {
+            renderWorkoutSelector();
+            loadWorkout(currentWorkout);
+            document.body.addEventListener('touchstart', () => getAudioContext(), { once: true });
+            document.body.addEventListener('click', () => getAudioContext(), { once: true });
+        }
+
+        function renderWorkoutSelector() {
+            const selector = document.getElementById('workoutSelector');
+            selector.innerHTML = Object.keys(workouts).map(key => `
+                <button class="workout-btn ${key === currentWorkout ? 'active' : ''}" 
+                        onclick="loadWorkout('${key}')">
+                    ${workouts[key].label}<br>${workouts[key].name}
+                </button>
+            `).join('');
+        }
+
+        function loadWorkout(workoutKey) {
+            currentWorkout = workoutKey;
+            const workout = workouts[workoutKey];
+            const content = document.getElementById('workoutContent');
+            const history = JSON.parse(localStorage.getItem('simpleGainsHistory') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+
+            document.querySelectorAll('.workout-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', Object.keys(workouts)[i] === workoutKey);
+            });
+
+            let html = '';
+            workout.exercises.forEach((exercise, idx) => {
+                const lastEntry = history
+                    .filter(h => h.exercise === exercise.name && h.workout === workoutKey && h.date !== today)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+                let suggestedWeight = '';
+                let showReady = false;
+
+                if (lastEntry) {
+                    if (exercise.unilateral) {
+                        if (lastEntry.time1L >= 70 && lastEntry.time1R >= 70 && lastEntry.time2L >= 70 && lastEntry.time2R >= 70) {
+                            suggestedWeight = lastEntry.weight + exercise.increment;
+                            showReady = true;
+                        } else {
+                            suggestedWeight = lastEntry.weight;
+                        }
+                    } else {
+                        if (lastEntry.time1 >= 70 && lastEntry.time2 >= 70) {
+                            suggestedWeight = lastEntry.weight + exercise.increment;
+                            showReady = true;
+                        } else {
+                            suggestedWeight = lastEntry.weight;
+                        }
+                    }
+                }
+
+                const todayEntry = history.find(h => 
+                    h.exercise === exercise.name && h.workout === workoutKey && h.date === today
+                );
+
+                if (exercise.unilateral) {
+                    html += renderUnilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry);
+                } else {
+                    html += renderBilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry);
+                }
+            });
+
+            content.innerHTML = html;
+            
+            workout.exercises.forEach((exercise, idx) => {
+                if (exercise.unilateral) {
+                    updateGoButton(idx, '1L');
+                    updateGoButton(idx, '1R');
+                    updateGoButton(idx, '2L');
+                    updateGoButton(idx, '2R');
+                } else {
+                    updateGoButton(idx, 1);
+                    updateGoButton(idx, 2);
+                }
+            });
+            
+            renderHistory();
+        }
+
+        function renderBilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry) {
+            return `
+                <div class="exercise-card" id="card-${idx}">
+                    <div class="exercise-header">
+                        <div class="exercise-title">${exercise.name}</div>
+                        ${showReady && !todayEntry ? '<div class="ready-badge">↑ Ready!</div>' : ''}
+                    </div>
+                    <div class="weight-row">
+                        <span class="weight-label">Weight:</span>
+                        <input type="number" class="weight-input" id="weight-${idx}" 
+                               placeholder="lbs" value="${todayEntry ? todayEntry.weight : suggestedWeight}"
+                               oninput="onWeightInput(${idx})"
+                               ${todayEntry ? 'disabled' : ''}>
+                    </div>
+                    <div class="sets-container">
+                        <div class="set-box">
+                            <div class="set-label">Set 1</div>
+                            <div class="timer-display" id="timer-${idx}-1">${todayEntry ? formatTime(todayEntry.time1) : '00:00'}</div>
+                            <button class="timer-btn ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-1" 
+                                    onclick="handleTimer(${idx}, 1)"
+                                    ${todayEntry ? 'disabled' : ''}>
+                                ${todayEntry ? 'Completed' : 'Enter Weight'}
+                            </button>
+                        </div>
+                        <div class="set-box">
+                            <div class="set-label">Set 2</div>
+                            <div class="timer-display" id="timer-${idx}-2">${todayEntry ? formatTime(todayEntry.time2) : '00:00'}</div>
+                            <button class="timer-btn ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-2" 
+                                    onclick="handleTimer(${idx}, 2)"
+                                    ${todayEntry ? 'disabled' : ''}>
+                                ${todayEntry ? 'Completed' : 'Enter Weight'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUnilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry) {
+            return `
+                <div class="exercise-card" id="card-${idx}" data-unilateral="true">
+                    <div class="exercise-header">
+                        <div class="exercise-title">${exercise.name}</div>
+                        ${showReady && !todayEntry ? '<div class="ready-badge">↑ Ready!</div>' : ''}
+                    </div>
+                    <div class="weight-row">
+                        <span class="weight-label">Weight:</span>
+                        <input type="number" class="weight-input" id="weight-${idx}" 
+                               placeholder="lbs" value="${todayEntry ? todayEntry.weight : suggestedWeight}"
+                               oninput="onWeightInput(${idx})"
+                               ${todayEntry ? 'disabled' : ''}>
+                    </div>
+                    <div class="set-row">
+                        <div class="set-row-label">Set 1</div>
+                        <div class="lr-container">
+                            <div class="lr-box">
+                                <div class="lr-label">Left</div>
+                                <div class="timer-display small" id="timer-${idx}-1L">${todayEntry ? formatTime(todayEntry.time1L) : '00:00'}</div>
+                                <button class="timer-btn small ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-1L" 
+                                        onclick="handleTimer(${idx}, '1L')"
+                                        ${todayEntry ? 'disabled' : ''}>
+                                    ${todayEntry ? 'Done' : 'Enter Wt'}
+                                </button>
+                            </div>
+                            <div class="lr-box">
+                                <div class="lr-label">Right</div>
+                                <div class="timer-display small" id="timer-${idx}-1R">${todayEntry ? formatTime(todayEntry.time1R) : '00:00'}</div>
+                                <button class="timer-btn small ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-1R" 
+                                        onclick="handleTimer(${idx}, '1R')"
+                                        ${todayEntry ? 'disabled' : ''}>
+                                    ${todayEntry ? 'Done' : 'Enter Wt'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="set-row">
+                        <div class="set-row-label">Set 2</div>
+                        <div class="lr-container">
+                            <div class="lr-box">
+                                <div class="lr-label">Left</div>
+                                <div class="timer-display small" id="timer-${idx}-2L">${todayEntry ? formatTime(todayEntry.time2L) : '00:00'}</div>
+                                <button class="timer-btn small ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-2L" 
+                                        onclick="handleTimer(${idx}, '2L')"
+                                        ${todayEntry ? 'disabled' : ''}>
+                                    ${todayEntry ? 'Done' : 'Enter Wt'}
+                                </button>
+                            </div>
+                            <div class="lr-box">
+                                <div class="lr-label">Right</div>
+                                <div class="timer-display small" id="timer-${idx}-2R">${todayEntry ? formatTime(todayEntry.time2R) : '00:00'}</div>
+                                <button class="timer-btn small ${todayEntry ? 'completed' : 'go'}" id="btn-${idx}-2R" 
+                                        onclick="handleTimer(${idx}, '2R')"
+                                        ${todayEntry ? 'disabled' : ''}>
+                                    ${todayEntry ? 'Done' : 'Enter Wt'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function onWeightInput(exerciseIdx) {
+            const workout = workouts[currentWorkout];
+            const exercise = workout.exercises[exerciseIdx];
+            
+            if (exercise.unilateral) {
+                updateGoButton(exerciseIdx, '1L');
+                updateGoButton(exerciseIdx, '1R');
+                updateGoButton(exerciseIdx, '2L');
+                updateGoButton(exerciseIdx, '2R');
+            } else {
+                updateGoButton(exerciseIdx, 1);
+                updateGoButton(exerciseIdx, 2);
+            }
+        }
+
+        function updateGoButton(exerciseIdx, setId) {
+            const weightInput = document.getElementById(`weight-${exerciseIdx}`);
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setId}`);
+            
+            if (!btn || btn.classList.contains('completed') || btn.classList.contains('stop')) return;
+            
+            const isUnilateral = typeof setId === 'string';
+            
+            if (weightInput.value && parseFloat(weightInput.value) > 0) {
+                btn.textContent = 'Go';
+                btn.disabled = false;
+            } else {
+                btn.textContent = isUnilateral ? 'Enter Wt' : 'Enter Weight';
+                btn.disabled = true;
+            }
+        }
+
+        function handleTimer(exerciseIdx, setId) {
+            const timerKey = `${exerciseIdx}-${setId}`;
+            
+            if (timers[timerKey]) {
+                stopTimer(exerciseIdx, setId);
+            } else {
+                startCountdown(exerciseIdx, setId);
+            }
+        }
+
+        function startCountdown(exerciseIdx, setId) {
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setId}`);
+            const display = document.getElementById(`timer-${exerciseIdx}-${setId}`);
+            const weightInput = document.getElementById(`weight-${exerciseIdx}`);
+            let countdown = 5;
+
+            weightInput.disabled = true;
+            display.textContent = countdown;
+            display.classList.add('countdown');
+            btn.textContent = 'Ready...';
+            btn.disabled = true;
+            btn.classList.remove('go');
+            beep(600, 150);
+
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    display.textContent = countdown;
+                    beep(600, 150);
+                } else {
+                    clearInterval(countdownInterval);
+                    display.classList.remove('countdown');
+                    beep(1000, 300);
+                    startTimer(exerciseIdx, setId);
+                }
+            }, 1000);
+        }
+
+        function startTimer(exerciseIdx, setId) {
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setId}`);
+            const display = document.getElementById(`timer-${exerciseIdx}-${setId}`);
+            const timerKey = `${exerciseIdx}-${setId}`;
+            let seconds = 0;
+            let beeped70 = false;
+
+            btn.disabled = false;
+            btn.textContent = 'Stop';
+            btn.classList.add('stop');
+
+            const interval = setInterval(() => {
+                seconds++;
+                display.textContent = formatTime(seconds);
+
+                if (seconds === 70 && !beeped70) {
+                    beeped70 = true;
+                    display.classList.add('success');
+                    beep(1000, 200, 3);
+                }
+            }, 1000);
+
+            timers[timerKey] = { interval, getSeconds: () => seconds };
+        }
+
+        function stopTimer(exerciseIdx, setId) {
+            const timerKey = `${exerciseIdx}-${setId}`;
+            const timerObj = timers[timerKey];
+            const seconds = timerObj.getSeconds();
+            clearInterval(timerObj.interval);
+            delete timers[timerKey];
+
+            const btn = document.getElementById(`btn-${exerciseIdx}-${setId}`);
+            const isUnilateral = typeof setId === 'string';
+            
+            btn.textContent = isUnilateral ? 'Done' : 'Completed';
+            btn.classList.remove('stop');
+            btn.classList.add('completed');
+            btn.disabled = true;
+
+            const workout = workouts[currentWorkout];
+            const exercise = workout.exercises[exerciseIdx];
+
+            // Determine if we should show rest and/or save
+            if (exercise.unilateral) {
+                // Unilateral: rest after 1R and 2R, save after 2R
+                if (setId === '1R') {
+                    showRestOverlay();
+                } else if (setId === '2R') {
+                    saveUnilateralExercise(exerciseIdx);
+                    showRestOverlay();
+                }
+                // No rest after 1L or 2L (other side is next)
+            } else {
+                // Bilateral: rest after each set, save after set 2
+                if (setId === 2) {
+                    saveBilateralExercise(exerciseIdx);
+                }
+                showRestOverlay();
+            }
+        }
+
+        function saveBilateralExercise(exerciseIdx) {
+            const workout = workouts[currentWorkout];
+            const exercise = workout.exercises[exerciseIdx];
+            const weight = parseFloat(document.getElementById(`weight-${exerciseIdx}`).value) || 0;
+            const time1 = parseTime(document.getElementById(`timer-${exerciseIdx}-1`).textContent);
+            const time2 = parseTime(document.getElementById(`timer-${exerciseIdx}-2`).textContent);
+
+            const entry = {
+                date: new Date().toISOString().split('T')[0],
+                workout: currentWorkout,
+                exercise: exercise.name,
+                weight: weight,
+                time1: time1,
+                time2: time2
+            };
+
+            saveToHistory(entry);
+        }
+
+        function saveUnilateralExercise(exerciseIdx) {
+            const workout = workouts[currentWorkout];
+            const exercise = workout.exercises[exerciseIdx];
+            const weight = parseFloat(document.getElementById(`weight-${exerciseIdx}`).value) || 0;
+            const time1L = parseTime(document.getElementById(`timer-${exerciseIdx}-1L`).textContent);
+            const time1R = parseTime(document.getElementById(`timer-${exerciseIdx}-1R`).textContent);
+            const time2L = parseTime(document.getElementById(`timer-${exerciseIdx}-2L`).textContent);
+            const time2R = parseTime(document.getElementById(`timer-${exerciseIdx}-2R`).textContent);
+
+            const entry = {
+                date: new Date().toISOString().split('T')[0],
+                workout: currentWorkout,
+                exercise: exercise.name,
+                weight: weight,
+                time1L: time1L,
+                time1R: time1R,
+                time2L: time2L,
+                time2R: time2R,
+                unilateral: true
+            };
+
+            saveToHistory(entry);
+        }
+
+        function saveToHistory(entry) {
+            const history = JSON.parse(localStorage.getItem('simpleGainsHistory') || '[]');
+            
+            const filtered = history.filter(h => 
+                !(h.exercise === entry.exercise && h.workout === entry.workout && h.date === entry.date)
+            );
+            filtered.push(entry);
+            localStorage.setItem('simpleGainsHistory', JSON.stringify(filtered));
+            renderHistory();
+        }
+
+        function parseTime(timeStr) {
+            const parts = timeStr.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+
+        function showRestOverlay() {
+            const overlay = document.getElementById('restOverlay');
+            const timerDisplay = document.getElementById('restTimer');
+            let restSeconds = 90;
+
+            overlay.classList.add('show');
+            timerDisplay.textContent = restSeconds;
+
+            restInterval = setInterval(() => {
+                restSeconds--;
+                timerDisplay.textContent = restSeconds;
+
+                if (restSeconds <= 0) {
+                    skipRest();
+                    beep(800, 200, 2);
+                }
+            }, 1000);
+        }
+
+        function skipRest() {
+            clearInterval(restInterval);
+            document.getElementById('restOverlay').classList.remove('show');
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function renderHistory() {
+            const historyContent = document.getElementById('historyContent');
+            const history = JSON.parse(localStorage.getItem('simpleGainsHistory') || '[]');
+            
+            const workoutHistory = history
+                .filter(h => h.workout === currentWorkout)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const byDate = {};
+            workoutHistory.forEach(entry => {
+                if (!byDate[entry.date]) byDate[entry.date] = [];
+                byDate[entry.date].push(entry);
+            });
+
+            let html = '';
+            const dates = Object.keys(byDate).slice(0, 5);
+            
+            dates.forEach((date, i) => {
+                const dateObj = new Date(date + 'T12:00:00');
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                html += `<span class="history-date">${dateStr}</span>\n`;
+                
+                byDate[date].forEach(entry => {
+                    if (entry.unilateral) {
+                        html += `${entry.exercise}: ${entry.weight}lb → ${entry.time1L}s, ${entry.time1R}s, ${entry.time2L}s, ${entry.time2R}s\n`;
+                    } else {
+                        html += `${entry.exercise}: ${entry.weight}lb → ${entry.time1}s, ${entry.time2}s\n`;
+                    }
+                });
+                
+                if (i < dates.length - 1) html += '\n';
+            });
+
+            historyContent.innerHTML = html || 'No history yet';
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
