@@ -54,6 +54,7 @@
         .history-title { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
         .history-content { font-size: 13px; color: rgba(255, 255, 255, 0.7); white-space: pre-line; line-height: 1.6; }
         .history-date { color: #fff; font-weight: 600; }
+        .history-duration { color: rgba(255, 255, 255, 0.5); font-size: 12px; }
     </style>
 </head>
 <body>
@@ -70,7 +71,7 @@
         </div>
     </div>
     <div class="rest-overlay" id="restOverlay">
-        <div class="rest-title">Rest</div>
+        <div class="rest-title" id="restTitle">Rest</div>
         <div class="rest-timer" id="restTimer">90</div>
         <button class="rest-skip" onclick="skipRest()">Skip</button>
     </div>
@@ -80,8 +81,8 @@
                 { name: "Incline Press", increment: 2.5 },
                 { name: "Chest-Supported Row", increment: 2.5 },
                 { name: "Pullover", increment: 2.5 },
-                { name: "Trap Bar Deadlift", increment: 5 },
-                { name: "Trap Bar Shrug", increment: 5 }
+                { name: "Trap Bar Dead-Shrug", increment: 5 },
+                { name: "Lateral Raise", increment: 2.5 }
             ]},
             B: { name: "Day B", label: "Wed", exercises: [
                 { name: "Overhead Press", increment: 2.5 },
@@ -92,16 +93,19 @@
             ]},
             C: { name: "Day C", label: "Fri", exercises: [
                 { name: "Bench Press", increment: 2.5 },
-                { name: "Reverse Fly", increment: 2.5 },
                 { name: "Pullover", increment: 2.5 },
-                { name: "DB Romanian Deadlift", increment: 2.5 },
-                { name: "Skull Crusher", increment: 2.5 }
+                { name: "Skull Crusher", increment: 2.5 },
+                { name: "Reverse Fly", increment: 2.5 },
+                { name: "DB Romanian Deadlift", increment: 2.5 }
             ]}
         };
         var currentWorkout = "A";
         var timers = {};
         var restInterval = null;
         var audioContext = null;
+        var workoutStartTime = null;
+        var pendingAutoStart = null;
+        
         function getAudioContext() {
             if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
             if (audioContext.state === "suspended") { audioContext.resume(); }
@@ -146,6 +150,7 @@
         }
         function loadWorkout(workoutKey) {
             currentWorkout = workoutKey;
+            workoutStartTime = null;
             var workout = workouts[workoutKey];
             var content = document.getElementById("workoutContent");
             var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
@@ -209,12 +214,13 @@
             var btn2Text = todayEntry ? "Completed" : "Enter Weight";
             var time1 = todayEntry ? formatTime(todayEntry.time1) : "00:00";
             var time2 = todayEntry ? formatTime(todayEntry.time2) : "00:00";
+            var btn2Disabled = todayEntry ? "disabled" : "disabled";
             return "<div class=\"exercise-card\" id=\"card-" + idx + "\">" +
                 "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + readyBadge + "</div>" +
                 "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span><input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" placeholder=\"lbs\" value=\"" + weightVal + "\" oninput=\"onWeightInput(" + idx + ")\" " + disabled + "></div>" +
                 "<div class=\"sets-container\">" +
                 "<div class=\"set-box\"><div class=\"set-label\">Set 1</div><div class=\"timer-display\" id=\"timer-" + idx + "-1\">" + time1 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-1\" onclick=\"handleTimer(" + idx + ", 1)\" " + disabled + ">" + btn1Text + "</button></div>" +
-                "<div class=\"set-box\"><div class=\"set-label\">Set 2</div><div class=\"timer-display\" id=\"timer-" + idx + "-2\">" + time2 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-2\" onclick=\"handleTimer(" + idx + ", 2)\" " + disabled + ">" + btn2Text + "</button></div>" +
+                "<div class=\"set-box\"><div class=\"set-label\">Set 2</div><div class=\"timer-display\" id=\"timer-" + idx + "-2\">" + time2 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-2\" onclick=\"handleTimer(" + idx + ", 2)\" " + btn2Disabled + ">" + btn2Text + "</button></div>" +
                 "</div></div>";
         }
         function renderUnilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry) {
@@ -227,24 +233,27 @@
             var t1R = todayEntry ? formatTime(todayEntry.time1R) : "00:00";
             var t2L = todayEntry ? formatTime(todayEntry.time2L) : "00:00";
             var t2R = todayEntry ? formatTime(todayEntry.time2R) : "00:00";
+            var btn1RDisabled = todayEntry ? "disabled" : "disabled";
+            var btn2LDisabled = todayEntry ? "disabled" : "disabled";
+            var btn2RDisabled = todayEntry ? "disabled" : "disabled";
             return "<div class=\"exercise-card\" id=\"card-" + idx + "\" data-unilateral=\"true\">" +
                 "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + readyBadge + "</div>" +
                 "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span><input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" placeholder=\"lbs\" value=\"" + weightVal + "\" oninput=\"onWeightInput(" + idx + ")\" " + disabled + "></div>" +
                 "<div class=\"set-row\"><div class=\"set-row-label\">Set 1</div><div class=\"lr-container\">" +
                 "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1L\">" + t1L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1L\" onclick=\"handleTimer(" + idx + ", '1L')\" " + disabled + ">" + btnText + "</button></div>" +
-                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1R\">" + t1R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1R\" onclick=\"handleTimer(" + idx + ", '1R')\" " + disabled + ">" + btnText + "</button></div>" +
+                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1R\">" + t1R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1R\" onclick=\"handleTimer(" + idx + ", '1R')\" " + btn1RDisabled + ">" + btnText + "</button></div>" +
                 "</div></div>" +
                 "<div class=\"set-row\"><div class=\"set-row-label\">Set 2</div><div class=\"lr-container\">" +
-                "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2L\">" + t2L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2L\" onclick=\"handleTimer(" + idx + ", '2L')\" " + disabled + ">" + btnText + "</button></div>" +
-                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2R\">" + t2R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2R\" onclick=\"handleTimer(" + idx + ", '2R')\" " + disabled + ">" + btnText + "</button></div>" +
+                "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2L\">" + t2L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2L\" onclick=\"handleTimer(" + idx + ", '2L')\" " + btn2LDisabled + ">" + btnText + "</button></div>" +
+                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2R\">" + t2R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2R\" onclick=\"handleTimer(" + idx + ", '2R')\" " + btn2RDisabled + ">" + btnText + "</button></div>" +
                 "</div></div></div>";
         }
         function onWeightInput(exerciseIdx) {
             var exercise = workouts[currentWorkout].exercises[exerciseIdx];
             if (exercise.unilateral) {
-                updateGoButton(exerciseIdx, "1L"); updateGoButton(exerciseIdx, "1R"); updateGoButton(exerciseIdx, "2L"); updateGoButton(exerciseIdx, "2R");
+                updateGoButton(exerciseIdx, "1L");
             } else {
-                updateGoButton(exerciseIdx, 1); updateGoButton(exerciseIdx, 2);
+                updateGoButton(exerciseIdx, 1);
             }
         }
         function updateGoButton(exerciseIdx, setId) {
@@ -252,6 +261,8 @@
             var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
             if (!btn || btn.classList.contains("completed") || btn.classList.contains("stop")) return;
             var isUnilateral = typeof setId === "string";
+            var isFirstSet = (setId === 1 || setId === "1L");
+            if (!isFirstSet) return;
             if (weightInput.value && parseFloat(weightInput.value) > 0) {
                 btn.textContent = "Go";
                 btn.disabled = false;
@@ -266,6 +277,9 @@
             else { startCountdown(exerciseIdx, setId); }
         }
         function startCountdown(exerciseIdx, setId) {
+            if (!workoutStartTime) {
+                workoutStartTime = new Date();
+            }
             var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
             var display = document.getElementById("timer-" + exerciseIdx + "-" + setId);
             var weightInput = document.getElementById("weight-" + exerciseIdx);
@@ -273,6 +287,7 @@
             weightInput.disabled = true;
             display.textContent = countdown;
             display.classList.add("countdown");
+            display.classList.remove("success");
             btn.textContent = "Ready...";
             btn.disabled = true;
             btn.classList.remove("go");
@@ -322,11 +337,23 @@
             btn.disabled = true;
             var exercise = workouts[currentWorkout].exercises[exerciseIdx];
             if (exercise.unilateral) {
-                if (setId === "1R") { showRestOverlay(); }
-                else if (setId === "2R") { saveUnilateralExercise(exerciseIdx); showRestOverlay(); }
+                if (setId === "1L") {
+                    showRestOverlay(0, exerciseIdx, "1R");
+                } else if (setId === "1R") {
+                    showRestOverlay(60, exerciseIdx, "2L");
+                } else if (setId === "2L") {
+                    showRestOverlay(0, exerciseIdx, "2R");
+                } else if (setId === "2R") {
+                    saveUnilateralExercise(exerciseIdx);
+                    showRestOverlay(90, null, null);
+                }
             } else {
-                if (setId === 2) { saveBilateralExercise(exerciseIdx); }
-                showRestOverlay();
+                if (setId === 1) {
+                    showRestOverlay(60, exerciseIdx, 2);
+                } else {
+                    saveBilateralExercise(exerciseIdx);
+                    showRestOverlay(90, null, null);
+                }
             }
         }
         function saveBilateralExercise(exerciseIdx) {
@@ -352,22 +379,91 @@
             var filtered = history.filter(function(h) { return !(h.exercise === entry.exercise && h.workout === entry.workout && h.date === entry.date); });
             filtered.push(entry);
             localStorage.setItem("simpleGainsHistory", JSON.stringify(filtered));
+            
+            var isLastExercise = isWorkoutComplete();
+            if (isLastExercise && workoutStartTime) {
+                saveWorkoutDuration();
+            }
             renderHistory();
         }
+        function isWorkoutComplete() {
+            var workout = workouts[currentWorkout];
+            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var today = new Date().toISOString().split("T")[0];
+            for (var i = 0; i < workout.exercises.length; i++) {
+                var found = false;
+                for (var j = 0; j < history.length; j++) {
+                    if (history[j].exercise === workout.exercises[i].name && history[j].workout === currentWorkout && history[j].date === today) {
+                        found = true; break;
+                    }
+                }
+                if (!found) return false;
+            }
+            return true;
+        }
+        function saveWorkoutDuration() {
+            var endTime = new Date();
+            var durationMs = endTime - workoutStartTime;
+            var durationMinutes = Math.round(durationMs / 60000);
+            var today = new Date().toISOString().split("T")[0];
+            var durations = JSON.parse(localStorage.getItem("simpleGainsDurations") || "{}");
+            var key = today + "-" + currentWorkout;
+            durations[key] = durationMinutes;
+            localStorage.setItem("simpleGainsDurations", JSON.stringify(durations));
+        }
         function parseTime(timeStr) { var parts = timeStr.split(":"); return parseInt(parts[0]) * 60 + parseInt(parts[1]); }
-        function showRestOverlay() {
+        function showRestOverlay(restSeconds, nextExerciseIdx, nextSetId) {
             var overlay = document.getElementById("restOverlay");
             var timerDisplay = document.getElementById("restTimer");
-            var restSeconds = 90;
+            var titleDisplay = document.getElementById("restTitle");
+            pendingAutoStart = null;
+            if (restSeconds === 0) {
+                if (nextExerciseIdx !== null && nextSetId !== null) {
+                    enableNextSet(nextExerciseIdx, nextSetId);
+                    startCountdown(nextExerciseIdx, nextSetId);
+                }
+                return;
+            }
+            if (nextExerciseIdx !== null && nextSetId !== null) {
+                titleDisplay.textContent = "Next set in...";
+                pendingAutoStart = { exerciseIdx: nextExerciseIdx, setId: nextSetId };
+            } else {
+                titleDisplay.textContent = "Rest";
+                pendingAutoStart = null;
+            }
             overlay.classList.add("show");
             timerDisplay.textContent = restSeconds;
             restInterval = setInterval(function() {
                 restSeconds--;
                 timerDisplay.textContent = restSeconds;
-                if (restSeconds <= 0) { skipRest(); beep(800, 200, 2); }
+                if (restSeconds <= 0) {
+                    clearInterval(restInterval);
+                    overlay.classList.remove("show");
+                    beep(800, 200, 2);
+                    if (pendingAutoStart) {
+                        enableNextSet(pendingAutoStart.exerciseIdx, pendingAutoStart.setId);
+                        startCountdown(pendingAutoStart.exerciseIdx, pendingAutoStart.setId);
+                        pendingAutoStart = null;
+                    }
+                }
             }, 1000);
         }
-        function skipRest() { clearInterval(restInterval); document.getElementById("restOverlay").classList.remove("show"); }
+        function enableNextSet(exerciseIdx, setId) {
+            var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
+            if (btn && !btn.classList.contains("completed")) {
+                btn.disabled = false;
+                btn.textContent = "Go";
+            }
+        }
+        function skipRest() {
+            clearInterval(restInterval);
+            document.getElementById("restOverlay").classList.remove("show");
+            if (pendingAutoStart) {
+                enableNextSet(pendingAutoStart.exerciseIdx, pendingAutoStart.setId);
+                startCountdown(pendingAutoStart.exerciseIdx, pendingAutoStart.setId);
+                pendingAutoStart = null;
+            }
+        }
         function formatTime(seconds) {
             var mins = Math.floor(seconds / 60);
             var secs = seconds % 60;
@@ -376,6 +472,7 @@
         function renderHistory() {
             var historyContent = document.getElementById("historyContent");
             var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var durations = JSON.parse(localStorage.getItem("simpleGainsDurations") || "{}");
             var workoutHistory = history.filter(function(h) { return h.workout === currentWorkout; });
             workoutHistory.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
             var byDate = {};
@@ -390,7 +487,9 @@
                 var date = dates[i];
                 var dateObj = new Date(date + "T12:00:00");
                 var dateStr = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                html += "<span class=\"history-date\">" + dateStr + "</span>\n";
+                var durationKey = date + "-" + currentWorkout;
+                var durationStr = durations[durationKey] ? " <span class=\"history-duration\">(" + durations[durationKey] + " min)</span>" : "";
+                html += "<span class=\"history-date\">" + dateStr + "</span>" + durationStr + "\n";
                 for (var j = 0; j < byDate[date].length; j++) {
                     var entry = byDate[date][j];
                     if (entry.unilateral) {
