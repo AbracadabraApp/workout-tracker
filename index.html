@@ -13,6 +13,7 @@
         .header { background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%); color: #fff; padding: 28px 24px 24px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
         .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
         .header p { font-size: 13px; color: rgba(255, 255, 255, 0.5); }
+        .header a { display: inline-block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 13px; text-decoration: none; }
         .workout-selector { display: flex; background: rgba(255, 255, 255, 0.08); padding: 8px; gap: 6px; }
         .workout-btn { flex: 1; padding: 14px 10px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
         .workout-btn.active { background: rgba(255, 255, 255, 0.12); color: #fff; }
@@ -55,7 +56,14 @@
         .set-label { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; text-transform: uppercase; }
         .set-time { font-size: 28px; font-weight: 700; color: #1d1d1f; font-variant-numeric: tabular-nums; }
         .set-time.counting { color: #007aff; }
+        .set-time.countdown { color: #ff9500; }
+        .set-time.success { color: #34a853; }
+        .lr-container { display: flex; gap: 8px; margin-bottom: 10px; }
+        .lr-box { flex: 1; background: #f5f5f7; border-radius: 10px; padding: 12px 8px; text-align: center; }
+        .lr-label { font-size: 11px; font-weight: 600; color: rgba(60, 60, 67, 0.5); margin-bottom: 6px; text-transform: uppercase; }
+        .set-time.small { font-size: 24px; }
         .timer-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
+        .timer-btn.small { padding: 10px; font-size: 14px; margin-top: 6px; }
         .timer-btn.go { background: #34a853; color: #fff; }
         .timer-btn.go:disabled { background: #ccc; color: #666; }
         .timer-btn.stop { background: #ff3b30; color: #fff; }
@@ -84,10 +92,6 @@
         .history-edit-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .history-edit-btn.save { background: #34a853; color: #fff; }
         .history-edit-btn.cancel { background: rgba(255, 255, 255, 0.1); color: #fff; }
-        .countdown-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); z-index: 1001; justify-content: center; align-items: center; flex-direction: column; }
-        .countdown-overlay.show { display: flex; }
-        .countdown-number { font-size: 120px; font-weight: 700; color: #fff; }
-        .countdown-label { font-size: 18px; color: rgba(255, 255, 255, 0.6); margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -95,6 +99,7 @@
         <div class="header">
             <h1>Josh's Simple Gains</h1>
             <p>Target: 40-70 seconds per set</p>
+            <a href="settings.html">⚙️ Settings</a>
         </div>
         <div class="workout-selector" id="workoutSelector"></div>
         <div class="metrics-section" id="metricsSection"></div>
@@ -113,11 +118,12 @@
         <div class="rest-next-exercise" id="restNextExercise">—</div>
         <button class="rest-skip" onclick="skipRest()">Skip</button>
     </div>
-    <div class="countdown-overlay" id="countdownOverlay">
-        <div class="countdown-number" id="countdownNumber">5</div>
-        <div class="countdown-label" id="countdownLabel">Get ready</div>
-    </div>
-    <script>
+    <script type="module">
+        import { initWorkoutData, saveWorkoutData } from './workoutData.js';
+        
+        var workoutHistoryData = [];  // Loaded from GitHub
+        var workoutDurationsData = {}; // Loaded from GitHub
+        
         var workouts = {
             A: { name: "Day A", label: "Mon", exercises: [
                 { name: "Incline Press", increment: 2.5 },
@@ -146,7 +152,6 @@
         var restInterval = null;
         var audioContext = null;
         var workoutStartTime = null;
-        var pendingAutoStart = null;
 
         // Progression flags stored in localStorage
         function getProgressionFlags() {
@@ -186,7 +191,6 @@
         }
 
         // Combined TUT progression logic
-        // Returns: { action: 'increase'|'maintain'|'deload', combinedTUT: number, hasPendingFlag: boolean }
         function evaluateProgression(exerciseName, workoutKey, lastEntry, exercise) {
             var exerciseKey = workoutKey + "_" + exerciseName;
             var flags = getProgressionFlags();
@@ -200,7 +204,6 @@
             var validSets = 0;
 
             if (exercise.unilateral) {
-                // For unilateral: sum all non-null sets
                 var times = [lastEntry.time1L, lastEntry.time1R, lastEntry.time2L, lastEntry.time2R];
                 for (var i = 0; i < times.length; i++) {
                     if (!isNullSet(times[i])) {
@@ -208,14 +211,12 @@
                         validSets++;
                     }
                 }
-                // Scale to 2-set equivalent if we have valid data
                 if (validSets > 0 && validSets < 4) {
                     combinedTUT = Math.round(combinedTUT * (4 / validSets) / 2);
                 } else if (validSets === 4) {
-                    combinedTUT = Math.round(combinedTUT / 2); // Average of L+R for each set
+                    combinedTUT = Math.round(combinedTUT / 2);
                 }
             } else {
-                // For bilateral: sum non-null sets
                 if (!isNullSet(lastEntry.time1)) {
                     combinedTUT += lastEntry.time1;
                     validSets++;
@@ -224,13 +225,11 @@
                     combinedTUT += lastEntry.time2;
                     validSets++;
                 }
-                // If only one valid set, we can't make a reliable decision - maintain
                 if (validSets === 1) {
                     return { action: 'maintain', combinedTUT: combinedTUT, hasPendingFlag: hasPendingFlag };
                 }
             }
 
-            // Thresholds: >140 increase, <80 deload, 80-140 maintain
             if (combinedTUT > 140) {
                 if (hasPendingFlag) {
                     return { action: 'increase', combinedTUT: combinedTUT, hasPendingFlag: true };
@@ -244,12 +243,18 @@
             }
         }
 
-        function initApp() {
+        async function initApp() {
+            // Load workout data from GitHub (or local cache)
+            var data = await initWorkoutData();
+            workoutHistoryData = data.workoutHistory || [];
+            workoutDurationsData = data.workoutDurations || {};
+            
             renderWorkoutSelector();
             loadWorkout(currentWorkout);
             renderMetrics();
             renderHistory();
         }
+        
         function renderWorkoutSelector() {
             var selector = document.getElementById("workoutSelector");
             var html = "";
@@ -259,12 +264,13 @@
             }
             selector.innerHTML = html;
         }
+        
         function loadWorkout(workoutKey) {
             currentWorkout = workoutKey;
             workoutStartTime = null;
             var workout = workouts[workoutKey];
             var content = document.getElementById("workoutContent");
-            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var history = workoutHistoryData;
             var today = new Date().toISOString().split("T")[0];
             var btns = document.querySelectorAll(".workout-btn");
             var keys = Object.keys(workouts);
@@ -290,17 +296,16 @@
                     if (progression.action === 'increase') {
                         suggestedWeight = lastEntry.weight + exercise.increment;
                         showReady = true;
-                        clearProgressionFlag(exerciseKey); // Clear flag after increase
+                        clearProgressionFlag(exerciseKey);
                     } else if (progression.action === 'pending') {
                         suggestedWeight = lastEntry.weight;
                         showPending = true;
-                        setProgressionFlag(exerciseKey, true); // Set flag for next session
+                        setProgressionFlag(exerciseKey, true);
                     } else if (progression.action === 'deload') {
                         suggestedWeight = Math.max(0, lastEntry.weight - exercise.increment);
                         showDeload = true;
                         clearProgressionFlag(exerciseKey);
                     } else {
-                        // maintain
                         suggestedWeight = lastEntry.weight;
                         clearProgressionFlag(exerciseKey);
                     }
@@ -322,7 +327,7 @@
                 if (showDeload && !isCompleted) html += "<span class=\"deload-badge\">Deload</span>";
                 html += "</div>";
                 html += "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span>";
-                html += "<input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" value=\"" + (todayEntry ? todayEntry.weight : suggestedWeight) + "\" step=\"" + exercise.increment + "\">";
+                html += "<input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" value=\"" + (todayEntry ? todayEntry.weight : suggestedWeight) + "\" step=\"" + exercise.increment + "\" oninput=\"onWeightInput(" + idx + ")\">";
                 html += "<span class=\"weight-unit\">lb</span></div>";
                 if (exercise.unilateral) {
                     html += renderUnilateralSets(idx, todayEntry);
@@ -332,7 +337,9 @@
                 html += "</div>";
             }
             content.innerHTML = html;
+            updateAllButtons();
         }
+        
         function renderBilateralSets(idx, todayEntry) {
             var t1 = todayEntry ? todayEntry.time1 : 0;
             var t2 = todayEntry ? todayEntry.time2 : 0;
@@ -344,58 +351,105 @@
                 html += "<button class=\"timer-btn completed\" disabled>Completed</button>";
                 html += "<button class=\"restart-btn show\" onclick=\"restartExercise(" + idx + ")\">Restart Exercise</button>";
             } else {
-                html += "<button class=\"timer-btn go\" id=\"btn-" + idx + "\" onclick=\"handleTimer(" + idx + ", 1)\">Start Set 1</button>";
+                html += "<button class=\"timer-btn go\" id=\"btn-" + idx + "-1\" onclick=\"handleTimer(" + idx + ", 1)\">Enter Weight</button>";
                 html += "<button class=\"restart-btn\" id=\"restart-" + idx + "\"></button>";
             }
             return html;
         }
+        
         function renderUnilateralSets(idx, todayEntry) {
             var t1L = todayEntry ? todayEntry.time1L : 0;
             var t1R = todayEntry ? todayEntry.time1R : 0;
             var t2L = todayEntry ? todayEntry.time2L : 0;
             var t2R = todayEntry ? todayEntry.time2R : 0;
-            var html = "<div class=\"sets-container\">";
-            html += "<div class=\"set-box\"><div class=\"set-label\">1L</div><div class=\"set-time\" id=\"time-" + idx + "-1L\">" + t1L + "s</div></div>";
-            html += "<div class=\"set-box\"><div class=\"set-label\">1R</div><div class=\"set-time\" id=\"time-" + idx + "-1R\">" + t1R + "s</div></div>";
-            html += "<div class=\"set-box\"><div class=\"set-label\">2L</div><div class=\"set-time\" id=\"time-" + idx + "-2L\">" + t2L + "s</div></div>";
-            html += "<div class=\"set-box\"><div class=\"set-label\">2R</div><div class=\"set-time\" id=\"time-" + idx + "-2R\">" + t2R + "s</div></div>";
+            var html = "<div class=\"lr-container\">";
+            html += "<div class=\"lr-box\"><div class=\"lr-label\">Set 1L</div><div class=\"set-time small\" id=\"time-" + idx + "-1L\">" + t1L + "s</div>";
+            html += "<button class=\"timer-btn small go\" id=\"btn-" + idx + "-1L\" onclick=\"handleTimer(" + idx + ", '1L')\"" + (todayEntry ? " disabled" : "") + ">" + (todayEntry ? "Done" : "Enter Wt") + "</button></div>";
+            html += "<div class=\"lr-box\"><div class=\"lr-label\">Set 1R</div><div class=\"set-time small\" id=\"time-" + idx + "-1R\">" + t1R + "s</div>";
+            html += "<button class=\"timer-btn small go\" id=\"btn-" + idx + "-1R\" onclick=\"handleTimer(" + idx + ", '1R')\"" + (todayEntry ? " disabled" : "") + ">" + (todayEntry ? "Done" : "Enter Wt") + "</button></div>";
+            html += "</div>";
+            html += "<div class=\"lr-container\">";
+            html += "<div class=\"lr-box\"><div class=\"lr-label\">Set 2L</div><div class=\"set-time small\" id=\"time-" + idx + "-2L\">" + t2L + "s</div>";
+            html += "<button class=\"timer-btn small go\" id=\"btn-" + idx + "-2L\" onclick=\"handleTimer(" + idx +, '2L')\"" + (todayEntry ? " disabled" : "") + ">" + (todayEntry ? "Done" : "Enter Wt") + "</button></div>";
+            html += "<div class=\"lr-box\"><div class=\"lr-label\">Set 2R</div><div class=\"set-time small\" id=\"time-" + idx + "-2R\">" + t2R + "s</div>";
+            html += "<button class=\"timer-btn small go\" id=\"btn-" + idx + "-2R\" onclick=\"handleTimer(" + idx + ", '2R')\"" + (todayEntry ? " disabled" : "") + ">" + (todayEntry ? "Done" : "Enter Wt") + "</button></div>";
             html += "</div>";
             if (todayEntry) {
-                html += "<button class=\"timer-btn completed\" disabled>Completed</button>";
                 html += "<button class=\"restart-btn show\" onclick=\"restartExercise(" + idx + ")\">Restart Exercise</button>";
-            } else {
-                html += "<button class=\"timer-btn go\" id=\"btn-" + idx + "\" onclick=\"handleTimer(" + idx + ", '1L')\">Start Set 1L</button>";
-                html += "<button class=\"restart-btn\" id=\"restart-" + idx + "\"></button>";
             }
             return html;
         }
+
+        function onWeightInput(exerciseIdx) {
+            updateAllButtons();
+        }
+
+        function updateAllButtons() {
+            var workout = workouts[currentWorkout];
+            var hasActiveTimer = Object.keys(timers).length > 0;
+            
+            for (var idx = 0; idx < workout.exercises.length; idx++) {
+                var exercise = workout.exercises[idx];
+                if (exercise.unilateral) {
+                    ['1L', '1R', '2L', '2R'].forEach(function(setId) {
+                        updateButtonState(idx, setId, hasActiveTimer);
+                    });
+                } else {
+                    updateButtonState(idx, 1, hasActiveTimer);
+                    updateButtonState(idx, 2, hasActiveTimer);
+                }
+            }
+        }
+
+        function updateButtonState(exerciseIdx, setId, hasActiveTimer) {
+            var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
+            if (!btn) return;
+            
+            var timerKey = exerciseIdx + "-" + setId;
+            var isThisTimerActive = timers[timerKey] !== undefined;
+            
+            // Don't touch completed buttons or the currently running timer
+            if (btn.classList.contains('completed') || isThisTimerActive) return;
+            
+            var weightInput = document.getElementById("weight-" + exerciseIdx);
+            var hasWeight = weightInput && weightInput.value && parseFloat(weightInput.value) > 0;
+            
+            if (hasActiveTimer) {
+                // Another timer is running - disable this button
+                btn.disabled = true;
+                btn.textContent = 'Wait...';
+            } else {
+                // No timer running - enable if has weight
+                btn.disabled = !hasWeight;
+                btn.textContent = hasWeight ? 'Go' : (typeof setId === 'string' ? 'Enter Wt' : 'Enter Weight');
+            }
+        }
+
         function handleTimer(idx, setId) {
-            var btn = document.getElementById("btn-" + idx);
-            var timeEl = document.getElementById("time-" + idx + "-" + setId);
             var timerKey = idx + "-" + setId;
+            var btn = document.getElementById("btn-" + idx + "-" + setId);
+            var timeEl = document.getElementById("time-" + idx + "-" + setId);
+            
             if (!workoutStartTime) workoutStartTime = new Date();
+            
             if (timers[timerKey]) {
+                // Stop timer
                 clearInterval(timers[timerKey].interval);
                 var elapsed = Math.floor((Date.now() - timers[timerKey].start) / 1000);
                 timeEl.textContent = elapsed + "s";
                 timeEl.classList.remove("counting");
+                timeEl.classList.remove("countdown");
                 delete timers[timerKey];
+                
                 var exercise = workouts[currentWorkout].exercises[idx];
                 var nextSet = getNextSet(setId, exercise.unilateral);
+                
                 if (nextSet) {
-                    btn.textContent = "Start Set " + nextSet;
-                    btn.className = "timer-btn go";
-                    btn.onclick = function() { handleTimer(idx, nextSet); };
                     var restDuration = getRestDuration(setId, exercise.unilateral);
                     if (restDuration > 0) {
                         showRest(restDuration, idx, nextSet);
-                    } else {
-                        startCountdown(idx, nextSet);
                     }
                 } else {
-                    btn.textContent = "Completed";
-                    btn.className = "timer-btn completed";
-                    btn.disabled = true;
                     saveExercise(idx);
                     var nextExerciseIdx = idx + 1;
                     if (nextExerciseIdx < workouts[currentWorkout].exercises.length) {
@@ -406,47 +460,68 @@
                         saveWorkoutDuration();
                     }
                 }
+                
+                updateAllButtons();
             } else {
+                // Start countdown
                 startCountdown(idx, setId);
             }
         }
+
         function startCountdown(idx, setId) {
-            var overlay = document.getElementById("countdownOverlay");
-            var numberEl = document.getElementById("countdownNumber");
-            var labelEl = document.getElementById("countdownLabel");
+            var timeEl = document.getElementById("time-" + idx + "-" + setId);
+            var btn = document.getElementById("btn-" + idx + "-" + setId);
             var exercise = workouts[currentWorkout].exercises[idx];
-            labelEl.textContent = exercise.name + " - Set " + setId;
+            
             var count = 5;
-            numberEl.textContent = count;
-            overlay.classList.add("show");
-            playBeep(440, 0.1);
+            timeEl.textContent = count;
+            timeEl.classList.add("countdown");
+            btn.textContent = "Ready...";
+            btn.disabled = true;
+            playBeep(0.1, 440);
+            
             var countInterval = setInterval(function() {
                 count--;
                 if (count > 0) {
-                    numberEl.textContent = count;
-                    playBeep(440, 0.1);
+                    timeEl.textContent = count;
+                    playBeep(0.1, 440);
                 } else {
                     clearInterval(countInterval);
-                    overlay.classList.remove("show");
-                    playBeep(880, 0.3);
+                    timeEl.classList.remove("countdown");
+                    playBeep(0.3, 880);
                     startTimer(idx, setId);
                 }
             }, 1000);
         }
+
         function startTimer(idx, setId) {
-            var btn = document.getElementById("btn-" + idx);
+            var btn = document.getElementById("btn-" + idx + "-" + setId);
             var timeEl = document.getElementById("time-" + idx + "-" + setId);
             var timerKey = idx + "-" + setId;
+            
             timers[timerKey] = { start: Date.now(), interval: null };
             timeEl.classList.add("counting");
             btn.textContent = "Stop";
-            btn.className = "timer-btn stop";
-            btn.onclick = function() { handleTimer(idx, setId); };
+            btn.className = btn.className.replace('go', 'stop');
+            btn.disabled = false;
+            
+            var beeped70 = false;
             timers[timerKey].interval = setInterval(function() {
                 var elapsed = Math.floor((Date.now() - timers[timerKey].start) / 1000);
                 timeEl.textContent = elapsed + "s";
+                
+                if (elapsed >= 70 && !beeped70) {
+                    beeped70 = true;
+                    timeEl.classList.add("success");
+                    playBeep(0.2, 1000);
+                    setTimeout(function() { playBeep(0.2, 1000); }, 200);
+                    setTimeout(function() { playBeep(0.2, 1000); }, 400);
+                }
             }, 100);
+            
+            updateAllButtons();
         }
+
         function getNextSet(currentSet, isUnilateral) {
             if (isUnilateral) {
                 var order = ["1L", "1R", "2L", "2R"];
@@ -456,6 +531,7 @@
                 return currentSet === 1 ? 2 : null;
             }
         }
+
         function getRestDuration(currentSet, isUnilateral) {
             if (isUnilateral) {
                 if (currentSet === "1L") return 0;
@@ -466,62 +542,53 @@
                 return currentSet === 1 ? 60 : 90;
             }
         }
-        function getNextExerciseInfo(currentIdx) {
-            var nextIdx = currentIdx + 1;
-            if (nextIdx < workouts[currentWorkout].exercises.length) {
-                return workouts[currentWorkout].exercises[nextIdx].name;
-            }
-            return "Workout complete!";
-        }
+
         function showRest(duration, nextIdx, nextSet) {
             var overlay = document.getElementById("restOverlay");
             var timerEl = document.getElementById("restTimer");
             var titleEl = document.getElementById("restTitle");
             var nextExerciseEl = document.getElementById("restNextExercise");
             var remaining = duration;
+            
             timerEl.textContent = remaining;
-            titleEl.textContent = duration === 90 ? "Rest" : "Rest";
-
-            // Show what's coming next
+            titleEl.textContent = "Rest";
+            
             var currentExercise = workouts[currentWorkout].exercises[nextIdx];
             if (duration === 90 && nextIdx < workouts[currentWorkout].exercises.length) {
                 nextExerciseEl.textContent = currentExercise.name;
             } else {
                 nextExerciseEl.textContent = currentExercise.name + " - Set " + nextSet;
             }
-
+            
             overlay.classList.add("show");
-            pendingAutoStart = { idx: nextIdx, setId: nextSet };
+            
             restInterval = setInterval(function() {
                 remaining--;
                 timerEl.textContent = remaining;
                 if (remaining <= 0) {
                     clearInterval(restInterval);
                     overlay.classList.remove("show");
-                    if (pendingAutoStart) {
-                        startCountdown(pendingAutoStart.idx, pendingAutoStart.setId);
-                        pendingAutoStart = null;
-                    }
+                    // Manual start - no auto-start here
                 }
             }, 1000);
         }
+
         function skipRest() {
             if (restInterval) {
                 clearInterval(restInterval);
                 restInterval = null;
             }
             document.getElementById("restOverlay").classList.remove("show");
-            if (pendingAutoStart) {
-                startCountdown(pendingAutoStart.idx, pendingAutoStart.setId);
-                pendingAutoStart = null;
-            }
+            // Manual start - no auto-start here
         }
+
         function saveExercise(idx) {
             var exercise = workouts[currentWorkout].exercises[idx];
             var weight = parseFloat(document.getElementById("weight-" + idx).value) || 0;
             var today = new Date().toISOString().split("T")[0];
-            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var history = workoutHistoryData;
             var entry = { date: today, workout: currentWorkout, exercise: exercise.name, weight: weight };
+            
             if (exercise.unilateral) {
                 entry.time1L = parseInt(document.getElementById("time-" + idx + "-1L").textContent) || 0;
                 entry.time1R = parseInt(document.getElementById("time-" + idx + "-1R").textContent) || 0;
@@ -532,6 +599,7 @@
                 entry.time1 = parseInt(document.getElementById("time-" + idx + "-1").textContent) || 0;
                 entry.time2 = parseInt(document.getElementById("time-" + idx + "-2").textContent) || 0;
             }
+            
             var existingIndex = -1;
             for (var i = 0; i < history.length; i++) {
                 if (history[i].date === today && history[i].exercise === exercise.name && history[i].workout === currentWorkout) {
@@ -541,44 +609,48 @@
             }
             if (existingIndex >= 0) history[existingIndex] = entry;
             else history.push(entry);
-            localStorage.setItem("simpleGainsHistory", JSON.stringify(history));
+            
+            workoutHistoryData = history;
+            saveWorkoutDataToGitHub();
+            
             renderMetrics();
             renderHistory();
             document.getElementById("card-" + idx).classList.add("completed");
         }
+
         function saveWorkoutDuration() {
             if (!workoutStartTime) return;
             var duration = Math.round((new Date() - workoutStartTime) / 60000);
             var today = new Date().toISOString().split("T")[0];
-            var durations = JSON.parse(localStorage.getItem("workoutDurations") || "{}");
+            var durations = workoutDurationsData;
             durations[today + "-" + currentWorkout] = duration;
-            localStorage.setItem("workoutDurations", JSON.stringify(durations));
+            workoutDurationsData = durations;
+            saveWorkoutDataToGitHub();
             renderHistory();
         }
+
         function restartExercise(idx) {
             var exercise = workouts[currentWorkout].exercises[idx];
             var today = new Date().toISOString().split("T")[0];
-            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var history = workoutHistoryData;
             
-            // Remove today's entry for this exercise
             history = history.filter(function(h) {
                 return !(h.exercise === exercise.name && h.workout === currentWorkout && h.date === today);
             });
-            localStorage.setItem("simpleGainsHistory", JSON.stringify(history));
+            workoutHistoryData = history;
+            saveWorkoutDataToGitHub();
             
-            // Reload the workout to reset UI
             loadWorkout(currentWorkout);
         }
-        
+
         function renderMetrics() {
             var metricsSection = document.getElementById("metricsSection");
-            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var history = workoutHistoryData;
             
             var now = new Date();
             var fourWeeksAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
             var eightWeeksAgo = new Date(now.getTime() - 56 * 24 * 60 * 60 * 1000);
             
-            // Get unique session dates in last 4 weeks (across all workout types)
             var recentDates = {};
             for (var i = 0; i < history.length; i++) {
                 var entryDate = new Date(history[i].date + "T12:00:00");
@@ -589,7 +661,6 @@
             }
             var sessionsLast4Weeks = Object.keys(recentDates).length;
             
-            // Get current workout's exercise weight changes
             var workout = workouts[currentWorkout];
             var exerciseChanges = [];
             var totalCurrentWeight = 0;
@@ -599,14 +670,12 @@
             for (var idx = 0; idx < workout.exercises.length; idx++) {
                 var exercise = workout.exercises[idx];
                 
-                // Find most recent entry for this exercise
                 var recentEntries = history.filter(function(h) {
                     var d = new Date(h.date + "T12:00:00");
                     return h.exercise === exercise.name && h.workout === currentWorkout && d >= fourWeeksAgo;
                 });
                 recentEntries.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
                 
-                // Find entry from ~4 weeks ago
                 var olderEntries = history.filter(function(h) {
                     var d = new Date(h.date + "T12:00:00");
                     return h.exercise === exercise.name && h.workout === currentWorkout && d >= eightWeeksAgo && d < fourWeeksAgo;
@@ -637,21 +706,17 @@
                 });
             }
             
-            // Calculate total weight % change
             var totalPctChange = null;
             if (hasOldData && totalOldWeight > 0) {
                 totalPctChange = ((totalCurrentWeight - totalOldWeight) / totalOldWeight * 100).toFixed(1);
             }
             
-            // Build HTML
             var html = "<div class=\"metrics-title\">Rolling 4 Weeks <span>vs prior 4 weeks</span></div>";
             html += "<div class=\"metrics-grid\">";
             
-            // Sessions metric
             var sessionsClass = sessionsLast4Weeks >= 10 ? "positive" : (sessionsLast4Weeks >= 6 ? "neutral" : "negative");
             html += "<div class=\"metric-card\"><div class=\"metric-value " + sessionsClass + "\">" + sessionsLast4Weeks + "/12</div><div class=\"metric-label\">Sessions</div></div>";
             
-            // Total load % change
             var loadClass = "neutral";
             var loadDisplay = "—";
             if (totalPctChange !== null) {
@@ -660,12 +725,10 @@
             }
             html += "<div class=\"metric-card\"><div class=\"metric-value " + loadClass + "\">" + loadDisplay + "</div><div class=\"metric-label\">Total Load</div></div>";
             
-            // Current total weight
             html += "<div class=\"metric-card\"><div class=\"metric-value\">" + totalCurrentWeight + "</div><div class=\"metric-label\">Total lbs</div></div>";
             
             html += "</div>";
             
-            // Exercise-by-exercise breakdown
             html += "<div class=\"exercise-changes\">";
             for (var i = 0; i < exerciseChanges.length; i++) {
                 var ex = exerciseChanges[i];
@@ -692,15 +755,17 @@
             
             metricsSection.innerHTML = html;
         }
-        
+
         function renderHistory() {
             var historyContent = document.getElementById("historyContent");
-            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
-            var durations = JSON.parse(localStorage.getItem("workoutDurations") || "{}");
+            var history = workoutHistoryData;
+            var durations = workoutDurationsData;
+            
             if (history.length === 0) {
                 historyContent.innerHTML = "No history yet";
                 return;
             }
+            
             var byDate = {};
             for (var i = 0; i < history.length; i++) {
                 var entry = history[i];
@@ -708,8 +773,10 @@
                 if (!byDate[key]) byDate[key] = [];
                 byDate[key].push(entry);
             }
+            
             var keys = Object.keys(byDate).sort().reverse();
             var html = "";
+            
             for (var i = 0; i < Math.min(keys.length, 10); i++) {
                 var key = keys[i];
                 var parts = key.split("-");
@@ -720,23 +787,22 @@
                 var dateStr = months[dateObj.getMonth()] + " " + dateObj.getDate();
                 var durationKey = key;
                 var durationStr = durations[durationKey] ? " <span class=\"history-duration\">(" + durations[durationKey] + " min)</span>" : "";
+                
                 html += "<span class=\"history-date\">" + dateStr + "</span>" + durationStr;
                 html += "<span class=\"history-edit-icon\" onclick=\"toggleHistoryEdit('" + key + "')\">✏️</span>\n";
                 
-                // Build editable text for this session
                 var editText = "";
                 for (var j = 0; j < byDate[key].length; j++) {
                     var entry = byDate[key][j];
                     if (entry.unilateral) {
-                        html += entry.exercise + ": " + entry.weight + "lb -> " + entry.time1L + "s, " + entry.time1R + "s, " + entry.time2L + "s, " + entry.time2R + "s\n";
-                        editText += entry.exercise + ": " + entry.weight + "lb -> " + entry.time1L + "s, " + entry.time1R + "s, " + entry.time2L + "s, " + entry.time2R + "s\n";
+                        html += entry.exercise + ": " + entry.weight + "lb → " + entry.time1L + "s, " + entry.time1R + "s, " + entry.time2L + "s, " + entry.time2R + "s\n";
+                        editText += entry.exercise + ": " + entry.weight + "lb → " + entry.time1L + "s, " + entry.time1R + "s, " + entry.time2L + "s, " + entry.time2R + "s\n";
                     } else {
-                        html += entry.exercise + ": " + entry.weight + "lb -> " + entry.time1 + "s, " + entry.time2 + "s\n";
-                        editText += entry.exercise + ": " + entry.weight + "lb -> " + entry.time1 + "s, " + entry.time2 + "s\n";
+                        html += entry.exercise + ": " + entry.weight + "lb → " + entry.time1 + "s, " + entry.time2 + "s\n";
+                        editText += entry.exercise + ": " + entry.weight + "lb → " + entry.time1 + "s, " + entry.time2 + "s\n";
                     }
                 }
                 
-                // Edit container (hidden by default)
                 html += "<div class=\"history-edit-container\" id=\"edit-" + key + "\">";
                 html += "<textarea class=\"history-edit-textarea\" id=\"textarea-" + key + "\">" + editText.trim() + "</textarea>";
                 html += "<div class=\"history-edit-buttons\">";
@@ -746,17 +812,18 @@
                 
                 if (i < keys.length - 1) html += "\n";
             }
+            
             historyContent.innerHTML = html || "No history yet";
         }
-        
-        function toggleHistoryEdit(key) {
+
+        window.toggleHistoryEdit = function(key) {
             var container = document.getElementById("edit-" + key);
             if (container) {
                 container.classList.toggle("show");
             }
-        }
-        
-        function saveHistoryEdit(key) {
+        };
+
+        window.saveHistoryEdit = function(key) {
             var textarea = document.getElementById("textarea-" + key);
             var text = textarea.value.trim();
             var lines = text.split("\n");
@@ -765,19 +832,16 @@
             var date = parts.slice(0, 3).join("-");
             var workout = parts[3];
             
-            var history = JSON.parse(localStorage.getItem("simpleGainsHistory") || "[]");
+            var history = workoutHistoryData;
             
-            // Remove old entries for this date/workout
             history = history.filter(function(h) {
                 return !(h.date === date && h.workout === workout);
             });
             
-            // Parse new entries from text
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i].trim();
                 if (!line) continue;
                 
-                // Parse format: "Exercise Name: 25lb -> 65s, 58s" or "Exercise Name: 25lb -> 45s, 50s, 42s, 48s"
                 var match = line.match(/^(.+?):\s*(\d+(?:\.\d+)?)lb\s*->\s*(.+)$/);
                 if (!match) continue;
                 
@@ -794,14 +858,12 @@
                 };
                 
                 if (times.length === 4) {
-                    // Unilateral
                     entry.time1L = times[0];
                     entry.time1R = times[1];
                     entry.time2L = times[2];
                     entry.time2R = times[3];
                     entry.unilateral = true;
                 } else if (times.length >= 2) {
-                    // Bilateral
                     entry.time1 = times[0];
                     entry.time2 = times[1];
                 }
@@ -809,15 +871,37 @@
                 history.push(entry);
             }
             
-            localStorage.setItem("simpleGainsHistory", JSON.stringify(history));
+            workoutHistoryData = history;
+            saveWorkoutDataToGitHub();
+            
             toggleHistoryEdit(key);
             renderMetrics();
             renderHistory();
-            loadWorkout(currentWorkout); // Refresh in case we edited today's data
+            loadWorkout(currentWorkout);
+        };
+
+        window.loadWorkout = loadWorkout;
+        window.handleTimer = handleTimer;
+        window.skipRest = skipRest;
+        window.restartExercise = restartExercise;
+        window.onWeightInput = onWeightInput;
+
+        // Helper to save workout data to GitHub in the background
+        function saveWorkoutDataToGitHub() {
+            saveWorkoutData({
+                workoutHistory: workoutHistoryData,
+                workoutDurations: workoutDurationsData
+            }).catch(function(err) {
+                console.error('GitHub sync failed:', err);
+                // Data is still saved locally, will retry on next save
+            });
         }
-        
-        if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", initApp); }
-        else { initApp(); }
+
+        if (document.readyState === "loading") { 
+            document.addEventListener("DOMContentLoaded", initApp); 
+        } else { 
+            initApp(); 
+        }
     </script>
 </body>
 </html>
