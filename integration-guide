@@ -1,0 +1,179 @@
+# GitHub Sync Integration Guide
+
+## Files Created
+
+1. **workout-data.json** - Your workout history (ready to commit to repo)
+2. **github.js** - GitHub API client
+3. **tokenStorage.js** - Token management
+4. **workoutData.js** - Main sync logic
+5. **settings.html** - Settings UI for token management
+
+## Integration Steps
+
+### Step 1: Commit Files to Your Repo
+
+```bash
+# Copy these files to your workout-tracker repo
+cp workout-data.json /path/to/workout-tracker/
+cp github.js /path/to/workout-tracker/
+cp tokenStorage.js /path/to/workout-tracker/
+cp workoutData.js /path/to/workout-tracker/
+cp settings.html /path/to/workout-tracker/
+
+# Commit to main branch
+cd /path/to/workout-tracker
+git add .
+git commit -m "Add GitHub sync functionality"
+git push origin main
+```
+
+### Step 2: Update Your Existing App Code
+
+In your main app file (probably `index.html` or `app.js`), replace your current localStorage load/save logic with:
+
+```javascript
+// At the top of your file
+import { initWorkoutData, saveWorkoutData } from './workoutData.js';
+
+// Replace your current initialization code
+async function loadWorkoutHistory() {
+  const data = await initWorkoutData();
+  return data.workoutHistory;
+}
+
+async function loadWorkoutDurations() {
+  const data = await initWorkoutData();
+  return data.workoutDurations;
+}
+
+// Replace your current save code
+async function saveWorkout(workoutHistory, workoutDurations) {
+  const data = {
+    workoutHistory,
+    workoutDurations
+  };
+  
+  const result = await saveWorkoutData(data);
+  
+  // Optional: show sync status to user
+  if (result.error) {
+    console.warn('Sync issue:', result.error);
+    // You could show a toast notification here
+  }
+}
+```
+
+### Step 3: Add a Settings Link
+
+Add a link to the settings page in your app's navigation:
+
+```html
+<a href="settings.html">⚙️ Settings</a>
+```
+
+### Step 4: Create GitHub Token
+
+1. Go to https://github.com/settings/tokens?type=beta
+2. Click "Generate new token" (fine-grained)
+3. Name it: "Gains Workout Tracker"
+4. Set expiration: 90 days (or custom)
+5. Repository access: Select "Only select repositories" → choose `workout-tracker`
+6. Permissions → Repository permissions:
+   - **Contents**: Read and write access
+7. Click "Generate token"
+8. Copy the token (starts with `github_pat_` or `ghp_`)
+
+### Step 5: Configure in App
+
+1. Open your app
+2. Go to Settings
+3. Paste your GitHub token
+4. Click "Save Token"
+5. Click "Test Connection" to verify
+
+Done! Your workout data now syncs to GitHub automatically.
+
+## How It Works
+
+### On App Startup
+1. Checks if GitHub token exists
+2. If yes: fetches latest `workout-data.json` from GitHub
+3. If no token or offline: uses local cache
+4. Returns data to your app
+
+### When You Save a Workout
+1. Saves to localStorage immediately (no delay)
+2. Attempts to commit to GitHub
+3. If successful: updates cache with new SHA
+4. If fails: queues for retry later
+
+### If iOS Wipes the App
+1. Reinstall/refresh the app
+2. Re-enter your GitHub token in Settings
+3. Data automatically loads from GitHub
+4. You're back in business
+
+## Conflict Handling
+
+The system uses GitHub's SHA-based conflict prevention:
+- Every file has a unique SHA (hash)
+- When committing, we include the current SHA
+- If SHA doesn't match (someone else edited), commit fails
+- In your case (solo user), this prevents data loss if you somehow have two instances running
+
+For now, last-write-wins is fine. If you ever need merge logic, we can add it.
+
+## Security Notes
+
+⚠️ **Token Storage**: Your GitHub token is stored in localStorage, which means:
+- It's accessible only to your app on your device
+- It can be cleared by iOS (you'd just re-enter it)
+- XSS vulnerabilities could expose it (keep your app code secure)
+
+✅ **Best Practices**:
+- Use a fine-grained token (not classic)
+- Scope it to ONLY the `workout-tracker` repo
+- Set a reasonable expiration (90 days)
+- Revoke old tokens when generating new ones
+
+## Troubleshooting
+
+### "Token is invalid or lacks write access"
+- Regenerate token with Contents: Read & Write permission
+- Make sure you selected the right repository
+
+### "Saved locally but sync failed"
+- Check internet connection
+- Token may have expired (generate a new one)
+- Check GitHub API status: https://www.githubstatus.com
+
+### "No data showing after reinstall"
+- Go to Settings and enter your token
+- Data will load automatically from GitHub
+
+### Data got wiped before I set up sync
+- Check `workout-data.json` in your repo
+- It has your data up to 2026-01-09
+- Future workouts will sync automatically once token is configured
+
+## Optional Enhancements
+
+Want to add these later? Let me know:
+
+1. **Auto-retry**: Automatically retry failed syncs when app comes online
+2. **Sync indicator**: Show sync status in the main UI
+3. **Export feature**: Download workout data as JSON/CSV
+4. **Merge logic**: Smart conflict resolution if using multiple devices
+5. **Token refresh**: Auto-refresh tokens before expiration
+
+## Testing the Integration
+
+1. **Save a workout**: Complete an exercise and verify it commits to GitHub
+2. **Check GitHub**: Go to your repo and see the updated `workout-data.json`
+3. **Clear app data**: In iOS Settings → Safari → Clear History and Website Data
+4. **Reload app**: Enter token and verify data loads from GitHub
+5. **Offline test**: Turn off WiFi, save a workout, turn on WiFi, verify it syncs
+
+---
+
+You're all set! Your workout data is now safe in GitHub forever.
