@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Gains</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    
+    .section {
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #4a9eff;
+    }
+    
+    .info {
+      background: #1a3a5a;
+      border-left: 4px solid #4a9eff;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .warning {
+      background: #5a3a1a;
+      border-left: 4px solid #ff9a4a;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      background: #1a1a1a;
+      border: 2px solid #3a3a3a;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 15px;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .primary-btn {
+      background: #4a9eff;
+      color: #fff;
+    }
+    
+    .primary-btn:hover {
+      background: #3a8eef;
+    }
+    
+    .danger-btn {
+      background: #ff4a4a;
+      color: #fff;
+    }
+    
+    .danger-btn:hover {
+      background: #ef3a3a;
+    }
+    
+    .secondary-btn {
+      background: #3a3a3a;
+      color: #fff;
+    }
+    
+    .secondary-btn:hover {
+      background: #4a4a4a;
+    }
+    
+    .status {
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    
+    .status.success {
+      background: #1a5a3a;
+      border: 1px solid #2a8a5a;
+    }
+    
+    .status.error {
+      background: #5a1a1a;
+      border: 1px solid #8a2a2a;
+    }
+    
+    .status.info {
+      background: #1a3a5a;
+      border: 1px solid #2a5a8a;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    a {
+      color: #4a9eff;
+      text-decoration: none;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+    
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .sync-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .sync-indicator.synced {
+      background: #2a8a5a;
+    }
+    
+    .sync-indicator.pending {
+      background: #ffa500;
+    }
+    
+    .sync-indicator.error {
+      background: #ff4a4a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Settings</h1>
+    
+    <div class="section">
+      <h2>GitHub Sync</h2>
+      
+      <div id="syncStatus" class="sync-status">
+        <div class="sync-indicator" id="syncIndicator"></div>
+        <div id="syncText">Checking...</div>
+      </div>
+      
+      <div id="statusMessage" class="status hidden"></div>
+      
+      <div class="info">
+        <strong>Why GitHub sync?</strong><br>
+        Your workout data is stored in your GitHub repository, ensuring it's never lost even if iOS clears the app cache. Your data stays safe and you stay in control.
+      </div>
+      
+      <label for="tokenInput">GitHub Personal Access Token</label>
+      <input 
+        type="password" 
+        id="tokenInput" 
+        placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      >
+      
+      <div class="button-group">
+        <button class="primary-btn" id="saveTokenBtn">Save Token</button>
+        <button class="secondary-btn" id="testTokenBtn">Test Connection</button>
+        <button class="danger-btn" id="clearTokenBtn">Clear Token</button>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Setup Instructions</h2>
+      
+      <ol style="padding-left: 20px; margin-bottom: 15px;">
+        <li style="margin-bottom: 10px;">Go to <a href="https://github.com/settings/tokens?type=beta" target="_blank">GitHub Settings → Personal Access Tokens</a></li>
+        <li style="margin-bottom: 10px;">Click "Generate new token" (fine-grained)</li>
+        <li style="margin-bottom: 10px;">Set repository: <strong>AbracadabraApp/workout-tracker</strong></li>
+        <li style="margin-bottom: 10px;">Grant permissions: <strong>Contents → Read & Write</strong></li>
+        <li style="margin-bottom: 10px;">Copy the token and paste it above</li>
+      </ol>
+      
+      <div class="warning">
+        <strong>⚠️ Security Note:</strong><br>
+        Your token is stored locally in this app only. Never share your token with anyone. You can revoke it anytime in your GitHub settings.
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Pending Syncs</h2>
+      <div id="pendingInfo" style="font-size: 14px;">
+        Checking for pending syncs...
+      </div>
+      <button class="primary-btn" id="retryBtn" style="margin-top: 15px;">Retry Pending Syncs</button>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <button class="secondary-btn" onclick="history.back()">← Back to App</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { saveToken, loadToken, clearToken, hasToken } from './tokenStorage.js';
+    import { setToken, checkAccess } from './github.js';
+    import { getSyncStatus, retryPendingSaves } from './workoutData.js';
+    
+    const tokenInput = document.getElementById('tokenInput');
+    const saveTokenBtn = document.getElementById('saveTokenBtn');
+    const testTokenBtn = document.getElementById('testTokenBtn');
+    const clearTokenBtn = document.getElementById('clearTokenBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const syncIndicator = document.getElementById('syncIndicator');
+    const syncText = document.getElementById('syncText');
+    const pendingInfo = document.getElementById('pendingInfo');
+    const retryBtn = document.getElementById('retryBtn');
+    
+    // Load existing token on page load
+    if (hasToken()) {
+      const token = loadToken();
+      tokenInput.value = token;
+      updateSyncStatus();
+    } else {
+      showStatus('No token configured. Add one above to enable GitHub sync.', 'info');
+      updateSyncDisplay('error', 'Not synced - no token');
+    }
+    
+    // Save token
+    saveTokenBtn.addEventListener('click', () => {
+      const token = tokenInput.value.trim();
+      
+      if (!token) {
+        showStatus('Please enter a token', 'error');
+        return;
+      }
+      
+      if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+        showStatus('Invalid token format. Should start with ghp_ or github_pat_', 'error');
+        return;
+      }
+      
+      saveToken(token);
+      showStatus('✓ Token saved successfully', 'success');
+      updateSyncStatus();
+    });
+    
+    // Test token
+    testTokenBtn.addEventListener('click', async () => {
+      const token = tokenInput.value.trim();
+      
+      if (!token) {
+        showStatus('Please enter a token first', 'error');
+        return;
+      }
+      
+      showStatus('Testing connection...', 'info');
+      
+      setToken(token);
+      const hasAccess = await checkAccess('AbracadabraApp', 'workout-tracker');
+      
+      if (hasAccess) {
+        showStatus('✓ Token is valid and has write access', 'success');
+      } else {
+        showStatus('✗ Token is invalid or lacks write access', 'error');
+      }
+    });
+    
+    // Clear token
+    clearTokenBtn.addEventListener('click', () => {
+      if (confirm('Remove GitHub sync? Your data will stay in local cache but won\'t sync to GitHub.')) {
+        clearToken();
+        tokenInput.value = '';
+        showStatus('Token cleared', 'info');
+        updateSyncDisplay('error', 'Not synced - no token');
+        updatePendingInfo();
+      }
+    });
+    
+    // Retry pending syncs
+    retryBtn.addEventListener('click', async () => {
+      showStatus('Retrying pending syncs...', 'info');
+      const result = await retryPendingSaves();
+      
+      if (result.success) {
+        showStatus(`✓ Successfully synced ${result.synced} pending save(s)`, 'success');
+        updateSyncStatus();
+      } else {
+        showStatus('✗ Sync failed. Check your token and connection.', 'error');
+      }
+    });
+    
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status ${type}`;
+      statusMessage.classList.remove('hidden');
+    }
+    
+    function updateSyncDisplay(status, text) {
+      syncIndicator.className = `sync-indicator ${status}`;
+      syncText.textContent = text;
+    }
+    
+    function updateSyncStatus() {
+      const status = getSyncStatus();
+      
+      if (status.hasPending) {
+        updateSyncDisplay('pending', `${status.pendingCount} pending sync(s)`);
+      } else if (status.lastSync) {
+        const syncDate = new Date(status.lastSync);
+        updateSyncDisplay('synced', `Last synced: ${syncDate.toLocaleString()}`);
+      } else {
+        updateSyncDisplay('info', 'Ready to sync');
+      }
+      
+      updatePendingInfo();
+    }
+    
+    function updatePendingInfo() {
+      const status = getSyncStatus();
+      
+      if (status.hasPending) {
+        pendingInfo.innerHTML = `<strong style="color: #ffa500;">⚠️ ${status.pendingCount} pending sync(s)</strong><br>Click "Retry Pending Syncs" to sync now.`;
+      } else {
+        pendingInfo.textContent = '✓ All changes synced to GitHub';
+      }
+    }
+    
+    // Update status every 30 seconds
+    setInterval(updateSyncStatus, 30000);
+    
+    // Initial update
+    updatePendingInfo();
+  </script>
+</body>
+</html>
