@@ -4,59 +4,59 @@
       "date": "2025-12-30",
       "workout": "A",
       "exercise": "Incline Press",
-      "weight": 30,
-      "time1": 78,
-      "time2": 64
+      "weight": 40,
+      "time1": 80,
+      "time2": 34
     },
     {
       "date": "2025-12-30",
       "workout": "A",
       "exercise": "Chest-Supported Row",
-      "weight": 35,
-      "time1": 84,
-      "time2": 66
+      "weight": 20,
+      "time1": 82,
+      "time2": 94
     },
     {
       "date": "2025-12-30",
       "workout": "A",
       "exercise": "Pullover",
       "weight": 25,
-      "time1": 74,
-      "time2": 64
+      "time1": 72,
+      "time2": 63
     },
     {
       "date": "2025-12-30",
       "workout": "A",
       "exercise": "Trap Bar Dead-Shrug",
-      "weight": 70,
-      "time1": 86,
-      "time2": 74
+      "weight": 75,
+      "time1": 66,
+      "time2": 43
     },
     {
       "date": "2025-12-30",
       "workout": "A",
       "exercise": "Lateral Raise",
-      "weight": 15,
-      "time1": 89,
-      "time2": 74
+      "weight": 20,
+      "time1": 56,
+      "time2": 29
     },
     {
       "date": "2026-01-02",
       "workout": "B",
       "exercise": "Overhead Press",
-      "weight": 20,
-      "time1": 82,
-      "time2": 80
+      "weight": 15,
+      "time1": 89,
+      "time2": 93
     },
     {
       "date": "2026-01-02",
       "workout": "B",
       "exercise": "Single-Arm Row",
       "weight": 25,
-      "time1L": 73,
-      "time1R": 74,
-      "time2L": 58,
-      "time2R": 61,
+      "time1L": 84,
+      "time1R": 82,
+      "time2L": 50,
+      "time2R": 79,
       "unilateral": true
     },
     {
@@ -64,8 +64,8 @@
       "workout": "B",
       "exercise": "Pullover",
       "weight": 25,
-      "time1": 78,
-      "time2": 69
+      "time1": 95,
+      "time2": 62
     },
     {
       "date": "2026-01-02",
@@ -73,87 +73,87 @@
       "exercise": "Goblet Squat",
       "weight": 25,
       "time1": 70,
-      "time2": 77
+      "time2": 63
     },
     {
       "date": "2026-01-02",
       "workout": "B",
       "exercise": "Curl",
       "weight": 25,
-      "time1": 81,
-      "time2": 99
+      "time1": 51,
+      "time2": 45
     },
     {
       "date": "2026-01-04",
       "workout": "C",
       "exercise": "Bench Press",
       "weight": 40,
-      "time1": 113,
-      "time2": 71
+      "time1": 101,
+      "time2": 60
     },
     {
       "date": "2026-01-04",
       "workout": "C",
       "exercise": "Pullover",
-      "weight": 20,
-      "time1": 107,
-      "time2": 99
-    },
-    {
-      "date": "2026-01-04",
-      "workout": "C",
-      "exercise": "Skull Crusher",
-      "weight": 25,
-      "time1": 79,
-      "time2": 54
+      "weight": 10,
+      "time1": 137,
+      "time2": 84
     },
     {
       "date": "2026-01-04",
       "workout": "C",
       "exercise": "Reverse Fly",
       "weight": 15,
-      "time1": 86,
-      "time2": 68
+      "time1": 66,
+      "time2": 42
+    },
+    {
+      "date": "2026-01-04",
+      "workout": "C",
+      "exercise": "Skull Crusher",
+      "weight": 25,
+      "time1": 63,
+      "time2": 42
     },
     {
       "date": "2026-01-04",
       "workout": "C",
       "exercise": "DB Romanian Deadlift",
       "weight": 35,
-      "time1": 120,
-      "time2": 92
+      "time1": 83,
+      "time2": 51
     },
     {
       "date": "2026-01-05",
       "workout": "A",
       "exercise": "Incline Press",
-      "weight": 30,
-      "time1": 82,
-      "time2": 58
+      "weight": 45,
+      "time1": 65,
+      "time2": 33
     },
     {
       "date": "2026-01-05",
       "workout": "A",
       "exercise": "Chest-Supported Row",
-      "weight": 35,
-      "time1": 81,
-      "time2": 66
+      "weight": 22.5,
+      "time1": 57,
+      "time2": 76
     },
     {
       "date": "2026-01-05",
       "workout": "A",
       "exercise": "Pullover",
       "weight": 25,
-      "time1": 74,
-      "time2": 64
+      "time1": 72,
+      "time2": 46
     },
     {
       "date": "2026-01-05",
       "workout": "A",
       "exercise": "Trap Bar Dead-Shrug",
-      "weight": 70,
-      "time1": 82,
-      "time2": 68
+      "weight": 75,
+      "time1": 66,
+      "time2": 43
     },
     {
       "date": "2026-01-05",
@@ -245,6 +245,89 @@
       "weight": 35,
       "time1": 114,
       "time2": 87
+    },
+    {
+      "date": "2026-01-12",
+      "workout": "A",
+      "exercise": "Incline Press",
+      "weight": 45,
+      "time1": 65,
+      "time2": 33
+    },
+    {
+      "date": "2026-01-12",
+      "workout": "A",
+      "exercise": "Chest-Supported Row",
+      "weight": 22.5,
+      "time1": 57,
+      "time2": 76
+    },
+    {
+      "date": "2026-01-12",
+      "workout": "A",
+      "exercise": "Pullover",
+      "weight": 25,
+      "time1": 72,
+      "time2": 46
+    },
+    {
+      "date": "2026-01-12",
+      "workout": "A",
+      "exercise": "Trap Bar Dead-Shrug",
+      "weight": 75,
+      "time1": 66,
+      "time2": 43
+    },
+    {
+      "date": "2026-01-12",
+      "workout": "A",
+      "exercise": "Lateral Raise",
+      "weight": 20,
+      "time1": 61,
+      "time2": 41
+    },
+    {
+      "date": "2026-01-14",
+      "workout": "B",
+      "exercise": "Overhead Press",
+      "weight": 20,
+      "time1": 80,
+      "time2": 74
+    },
+    {
+      "date": "2026-01-14",
+      "workout": "B",
+      "exercise": "Single-Arm Row",
+      "weight": 25,
+      "time1L": 65,
+      "time1R": 75,
+      "time2L": 52,
+      "time2R": 65,
+      "unilateral": true
+    },
+    {
+      "date": "2026-01-14",
+      "workout": "B",
+      "exercise": "Pullover",
+      "weight": 25,
+      "time1": 75,
+      "time2": 1
+    },
+    {
+      "date": "2026-01-14",
+      "workout": "B",
+      "exercise": "Goblet Squat",
+      "weight": 25,
+      "time1": 66,
+      "time2": 70
+    },
+    {
+      "date": "2026-01-14",
+      "workout": "B",
+      "exercise": "Curl",
+      "weight": 25,
+      "time1": 73,
+      "time2": 96
     }
   ],
   "workoutDurations": {
@@ -253,6 +336,8 @@
     "2026-01-04-C": 50,
     "2026-01-05-A": 19,
     "2026-01-07-B": 31,
-    "2026-01-09-C": 40
+    "2026-01-09-C": 40,
+    "2026-01-12-A": 19,
+    "2026-01-14-B": 31
   }
 }
