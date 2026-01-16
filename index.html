@@ -22,6 +22,7 @@
         .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .exercise-title { font-size: 22px; font-weight: 600; color: #1d1d1f; }
         .ready-badge { background: linear-gradient(135deg, #34a853 0%, #2d9648 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .maintain-badge { background: linear-gradient(135deg, #ff9500 0%, #f57c00 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
         .weight-label { font-size: 15px; font-weight: 500; color: rgba(60, 60, 67, 0.8); }
         .weight-input { width: 80px; padding: 10px; border: 1.5px solid rgba(0, 0, 0, 0.12); background: #fff; border-radius: 8px; font-size: 17px; font-weight: 600; color: #1d1d1f; text-align: center; }
@@ -55,6 +56,17 @@
         .history-title { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
         .history-content { font-size: 13px; color: rgba(255, 255, 255, 0.7); white-space: pre-line; line-height: 1.6; }
         .history-date { color: #fff; font-weight: 600; }
+        .history-duration { color: rgba(255, 255, 255, 0.5); font-size: 12px; }
+        .history-edit-icon { color: rgba(255, 255, 255, 0.4); font-size: 11px; margin-left: 8px; cursor: pointer; }
+        .history-edit-icon:hover { color: rgba(255, 255, 255, 0.7); }
+        .history-edit-container { display: none; margin: 8px 0; }
+        .history-edit-container.show { display: block; }
+        .history-edit-textarea { width: 100%; min-height: 100px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #fff; font-family: monospace; font-size: 12px; padding: 10px; resize: vertical; }
+        .history-edit-textarea:focus { outline: none; border-color: rgba(255, 255, 255, 0.4); }
+        .history-edit-buttons { display: flex; gap: 8px; margin-top: 8px; }
+        .history-edit-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .history-edit-btn.save { background: #34a853; color: #fff; }
+        .history-edit-btn.cancel { background: rgba(255, 255, 255, 0.1); color: #fff; }
     </style>
 </head>
 <body>
@@ -178,31 +190,31 @@
                 filtered.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
                 if (filtered.length > 0) lastEntry = filtered[0];
                 var suggestedWeight = "";
-                var showReady = false;
+                var showNewWeight = false;
+                var showMaintain = false;
                 if (lastEntry) {
+                    var combinedTUT = 0;
                     if (exercise.unilateral) {
-                        if (lastEntry.time1L >= 70 && lastEntry.time1R >= 70 && lastEntry.time2L >= 70 && lastEntry.time2R >= 70) {
-                            suggestedWeight = lastEntry.weight + exercise.increment;
-                            showReady = true;
-                        } else {
-                            suggestedWeight = lastEntry.weight;
-                        }
+                        combinedTUT = (lastEntry.time1L + lastEntry.time1R + lastEntry.time2L + lastEntry.time2R) / 2;
                     } else {
-                        if (lastEntry.time1 >= 70 && lastEntry.time2 >= 70) {
-                            suggestedWeight = lastEntry.weight + exercise.increment;
-                            showReady = true;
-                        } else {
-                            suggestedWeight = lastEntry.weight;
-                        }
+                        combinedTUT = lastEntry.time1 + lastEntry.time2;
+                    }
+                    
+                    if (combinedTUT > 140) {
+                        suggestedWeight = lastEntry.weight + exercise.increment;
+                        showNewWeight = true;
+                    } else {
+                        suggestedWeight = lastEntry.weight;
+                        showMaintain = true;
                     }
                 }
                 var todayEntry = history.find(function(h) { 
                     return h.exercise === exercise.name && h.workout === workoutKey && h.date === today; 
                 });
                 if (exercise.unilateral) {
-                    html += renderUnilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry);
+                    html += renderUnilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry);
                 } else {
-                    html += renderBilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry);
+                    html += renderBilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry);
                 }
             }
             content.innerHTML = html;
@@ -217,8 +229,13 @@
             renderHistory();
         }
         
-        function renderBilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry) {
-            var readyBadge = (showReady && !todayEntry) ? "<div class=\"ready-badge\">↑ Ready!</div>" : "";
+        function renderBilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry) {
+            var badge = "";
+            if (showNewWeight && !todayEntry) {
+                badge = "<div class=\"ready-badge\">New Weight</div>";
+            } else if (showMaintain && !todayEntry) {
+                badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
+            }
             var weightVal = todayEntry ? todayEntry.weight : suggestedWeight;
             var disabled = todayEntry ? "disabled" : "";
             var btnClass = todayEntry ? "completed" : "go";
@@ -228,7 +245,7 @@
             var time2 = todayEntry ? formatTime(todayEntry.time2) : "00:00";
             var btn2Disabled = todayEntry ? "disabled" : "disabled";
             return "<div class=\"exercise-card\" id=\"card-" + idx + "\">" +
-                "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + readyBadge + "</div>" +
+                "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + badge + "</div>" +
                 "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span><input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" placeholder=\"lbs\" value=\"" + weightVal + "\" oninput=\"onWeightInput(" + idx + ")\" " + disabled + "></div>" +
                 "<div class=\"sets-container\">" +
                 "<div class=\"set-box\"><div class=\"set-label\">Set 1</div><div class=\"timer-display\" id=\"timer-" + idx + "-1\">" + time1 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-1\" onclick=\"handleTimer(" + idx + ", 1)\" " + disabled + ">" + btn1Text + "</button></div>" +
@@ -236,8 +253,13 @@
                 "</div></div>";
         }
         
-        function renderUnilateralExercise(exercise, idx, suggestedWeight, showReady, todayEntry) {
-            var readyBadge = (showReady && !todayEntry) ? "<div class=\"ready-badge\">↑ Ready!</div>" : "";
+        function renderUnilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry) {
+            var badge = "";
+            if (showNewWeight && !todayEntry) {
+                badge = "<div class=\"ready-badge\">New Weight</div>";
+            } else if (showMaintain && !todayEntry) {
+                badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
+            }
             var weightVal = todayEntry ? todayEntry.weight : suggestedWeight;
             var disabled = todayEntry ? "disabled" : "";
             var btnClass = todayEntry ? "completed" : "go";
@@ -250,7 +272,7 @@
             var btn2LDisabled = todayEntry ? "disabled" : "disabled";
             var btn2RDisabled = todayEntry ? "disabled" : "disabled";
             return "<div class=\"exercise-card\" id=\"card-" + idx + "\" data-unilateral=\"true\">" +
-                "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + readyBadge + "</div>" +
+                "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + badge + "</div>" +
                 "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span><input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" placeholder=\"lbs\" value=\"" + weightVal + "\" oninput=\"onWeightInput(" + idx + ")\" " + disabled + "></div>" +
                 "<div class=\"set-row\"><div class=\"set-row-label\">Set 1</div><div class=\"lr-container\">" +
                 "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1L\">" + t1L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1L\" onclick=\"handleTimer(" + idx + ", '1L')\" " + disabled + ">" + btnText + "</button></div>" +
@@ -491,6 +513,7 @@
         function renderHistory() {
             var historyContent = document.getElementById("historyContent");
             var history = workoutHistoryData;
+            var durations = workoutDurationsData;
             var workoutHistory = history.filter(function(h) { return h.workout === currentWorkout; });
             workoutHistory.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
             var byDate = {};
@@ -503,14 +526,30 @@
             dates.forEach(function(date, i) {
                 var dateObj = new Date(date + "T12:00:00");
                 var dateStr = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                html += "<span class=\"history-date\">" + dateStr + "</span>\n";
+                var key = date + "-" + currentWorkout;
+                var durationStr = durations[key] ? " <span class=\"history-duration\">(" + durations[key] + " min)</span>" : "";
+                
+                html += "<span class=\"history-date\">" + dateStr + "</span>" + durationStr;
+                html += "<span class=\"history-edit-icon\" onclick=\"toggleHistoryEdit('" + key + "')\">✏️</span>\n";
+                
+                var editText = "";
                 byDate[date].forEach(function(entry) {
                     if (entry.unilateral) {
                         html += entry.exercise + ": " + entry.weight + "lb → " + entry.time1L + "s, " + entry.time1R + "s, " + entry.time2L + "s, " + entry.time2R + "s\n";
+                        editText += entry.exercise + ": " + entry.weight + "lb → " + entry.time1L + "s, " + entry.time1R + "s, " + entry.time2L + "s, " + entry.time2R + "s\n";
                     } else {
                         html += entry.exercise + ": " + entry.weight + "lb → " + entry.time1 + "s, " + entry.time2 + "s\n";
+                        editText += entry.exercise + ": " + entry.weight + "lb → " + entry.time1 + "s, " + entry.time2 + "s\n";
                     }
                 });
+                
+                html += "<div class=\"history-edit-container\" id=\"edit-" + key + "\">";
+                html += "<textarea class=\"history-edit-textarea\" id=\"textarea-" + key + "\">" + editText.trim() + "</textarea>";
+                html += "<div class=\"history-edit-buttons\">";
+                html += "<button class=\"history-edit-btn cancel\" onclick=\"toggleHistoryEdit('" + key + "')\">Cancel</button>";
+                html += "<button class=\"history-edit-btn save\" onclick=\"saveHistoryEdit('" + key + "')\">Save</button>";
+                html += "</div></div>";
+                
                 if (i < dates.length - 1) html += "\n";
             });
             historyContent.innerHTML = html || "No history yet";
@@ -525,10 +564,74 @@
             });
         }
         
+        function toggleHistoryEdit(key) {
+            var container = document.getElementById("edit-" + key);
+            if (container) {
+                container.classList.toggle("show");
+            }
+        }
+        
+        function saveHistoryEdit(key) {
+            var textarea = document.getElementById("textarea-" + key);
+            var text = textarea.value.trim();
+            var lines = text.split("\n");
+            
+            var parts = key.split("-");
+            var date = parts.slice(0, 3).join("-");
+            var workout = parts[3];
+            
+            var history = workoutHistoryData;
+            history = history.filter(function(h) {
+                return !(h.date === date && h.workout === workout);
+            });
+            
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if (!line) continue;
+                
+                var match = line.match(/^(.+?):\s*(\d+(?:\.\d+)?)lb\s*→\s*(.+)$/);
+                if (!match) continue;
+                
+                var exerciseName = match[1].trim();
+                var weight = parseFloat(match[2]);
+                var timesStr = match[3];
+                var times = timesStr.split(",").map(function(t) { return parseInt(t.trim()) || 0; });
+                
+                var entry = {
+                    date: date,
+                    workout: workout,
+                    exercise: exerciseName,
+                    weight: weight
+                };
+                
+                if (times.length === 4) {
+                    entry.time1L = times[0];
+                    entry.time1R = times[1];
+                    entry.time2L = times[2];
+                    entry.time2R = times[3];
+                    entry.unilateral = true;
+                } else if (times.length >= 2) {
+                    entry.time1 = times[0];
+                    entry.time2 = times[1];
+                }
+                
+                history.push(entry);
+            }
+            
+            workoutHistoryData = history;
+            saveWorkoutDataToGitHub();
+            
+            toggleHistoryEdit(key);
+            renderHistory();
+            loadWorkout(currentWorkout);
+        }
+        
         window.loadWorkout = loadWorkout;
         window.onWeightInput = onWeightInput;
         window.handleTimer = handleTimer;
         window.skipRest = skipRest;
+        window.toggleHistoryEdit = toggleHistoryEdit;
+        window.saveHistoryEdit = saveHistoryEdit;
         
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", initApp);
