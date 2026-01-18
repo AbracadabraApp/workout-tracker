@@ -331,19 +331,19 @@
     },
     {
       "date": "2026-01-18",
-      "workout": "A",
-      "exercise": "Incline Press",
+      "workout": "C",
+      "exercise": "Bench Press",
       "weight": 45,
-      "time1": 102,
-      "time2": 49
+      "time1": 106,
+      "time2": 48
     },
     {
       "date": "2026-01-18",
       "workout": "C",
-      "exercise": "Bench Press",
-      "weight": 42.5,
-      "time1": 106,
-      "time2": 48
+      "exercise": "Pullover",
+      "weight": 25,
+      "time1": 132,
+      "time2": 79
     }
   ],
   "workoutDurations": {
