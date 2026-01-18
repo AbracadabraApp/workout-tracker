@@ -352,6 +352,14 @@
       "weight": 25,
       "time1": 64,
       "time2": 55
+    },
+    {
+      "date": "2026-01-18",
+      "workout": "C",
+      "exercise": "Reverse Fly",
+      "weight": 20,
+      "time1": 55,
+      "time2": 41
     }
   ],
   "workoutDurations": {
