@@ -392,6 +392,14 @@
       "weight": 25,
       "time1": 125,
       "time2": 56
+    },
+    {
+      "date": "2026-01-20",
+      "workout": "A",
+      "exercise": "Trap Bar Dead-Shrug",
+      "weight": 95,
+      "time1": 44,
+      "time2": 32
     }
   ],
   "workoutDurations": {
