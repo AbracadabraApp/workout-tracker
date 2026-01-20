@@ -384,6 +384,14 @@
       "weight": 45,
       "time1": 54,
       "time2": 42
+    },
+    {
+      "date": "2026-01-20",
+      "workout": "A",
+      "exercise": "Pullover",
+      "weight": 25,
+      "time1": 125,
+      "time2": 56
     }
   ],
   "workoutDurations": {
