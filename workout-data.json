@@ -475,6 +475,14 @@
       "weight": 30,
       "time1": 69,
       "time2": 41
+    },
+    {
+      "date": "2026-01-23",
+      "workout": "C",
+      "exercise": "Skull Crusher",
+      "weight": 25,
+      "time1": 19,
+      "time2": 57
     }
   ],
   "workoutDurations": {
