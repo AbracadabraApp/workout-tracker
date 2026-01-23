@@ -481,8 +481,16 @@
       "workout": "C",
       "exercise": "Skull Crusher",
       "weight": 25,
-      "time1": 19,
+      "time1": 59,
       "time2": 57
+    },
+    {
+      "date": "2026-01-23",
+      "workout": "C",
+      "exercise": "Reverse Fly",
+      "weight": 20,
+      "time1": 44,
+      "time2": 44
     }
   ],
   "workoutDurations": {
