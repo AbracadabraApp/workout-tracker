@@ -1,38 +1,25 @@
-// Token storage helper for GitHub authentication
-// Stores token in localStorage (okay if wiped - user just re-enters)
+// Token storage - reads from URL hash (iOS-proof)
+// Bookmark your app as: https://abracadabraapp.github.io/workout-tracker/#token=YOUR_TOKEN
 
-const TOKEN_KEY = 'gainsApp.githubToken';
-
-/**
- * Save GitHub token to localStorage
- * @param {string} token - GitHub personal access token
- */
-export function saveToken(token) {
-  if (!token || typeof token !== 'string') {
-    throw new Error('Token must be a non-empty string');
-  }
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-/**
- * Load GitHub token from localStorage
- * @returns {string|null} - Token or null if not found
- */
 export function loadToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  const hash = window.location.hash;
+  if (hash && hash.includes('token=')) {
+    const token = hash.split('token=')[1].split('&')[0];
+    return token || null;
+  }
+  return null;
 }
 
-/**
- * Remove token from localStorage
- */
+export function saveToken(token) {
+  // Update URL hash without reload
+  window.location.hash = `token=${token}`;
+  return true;
+}
+
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  window.location.hash = '';
 }
 
-/**
- * Check if token exists in localStorage
- * @returns {boolean}
- */
 export function hasToken() {
-  return localStorage.getItem(TOKEN_KEY) !== null;
+  return loadToken() !== null;
 }
