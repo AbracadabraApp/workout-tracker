@@ -499,6 +499,14 @@
       "weight": 45,
       "time1": 72,
       "time2": 49
+    },
+    {
+      "date": "2026-01-27",
+      "workout": "A",
+      "exercise": "Chest-Supported Row",
+      "weight": 45,
+      "time1": 66,
+      "time2": 55
     }
   ],
   "workoutDurations": {
