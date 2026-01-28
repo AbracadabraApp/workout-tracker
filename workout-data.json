@@ -539,6 +539,14 @@
       "weight": 30,
       "time1": 67,
       "time2": 60
+    },
+    {
+      "date": "2026-01-28",
+      "workout": "B",
+      "exercise": "Curl",
+      "weight": 30,
+      "time1": 103,
+      "time2": 50
     }
   ],
   "workoutDurations": {
