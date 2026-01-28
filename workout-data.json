@@ -566,6 +566,14 @@
       "weight": 27.5,
       "time1": 91,
       "time2": 78
+    },
+    {
+      "date": "2026-01-28",
+      "workout": "B",
+      "exercise": "Goblet Squat",
+      "weight": 30,
+      "time1": 76,
+      "time2": 51
     }
   ],
   "workoutDurations": {
