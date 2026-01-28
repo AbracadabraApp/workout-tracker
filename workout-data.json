@@ -531,6 +531,14 @@
       "weight": 20,
       "time1": 57,
       "time2": 48
+    },
+    {
+      "date": "2026-01-28",
+      "workout": "B",
+      "exercise": "Overhead Press",
+      "weight": 30,
+      "time1": 67,
+      "time2": 60
     }
   ],
   "workoutDurations": {
