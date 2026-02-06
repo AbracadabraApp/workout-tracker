@@ -606,6 +606,14 @@
       "weight": 25,
       "time1": 63,
       "time2": 51
+    },
+    {
+      "date": "2026-02-06",
+      "workout": "C",
+      "exercise": "DB Romanian Deadlift",
+      "weight": 69,
+      "time1": 54,
+      "time2": 42
     }
   ],
   "workoutDurations": {
