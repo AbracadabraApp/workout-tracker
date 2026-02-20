@@ -697,6 +697,14 @@
       "weight": 35,
       "time1": 77,
       "time2": 54
+    },
+    {
+      "date": "2026-02-20",
+      "workout": "C",
+      "exercise": "Bench Press",
+      "weight": 60,
+      "time1": 72,
+      "time2": 52
     }
   ],
   "workoutDurations": {
