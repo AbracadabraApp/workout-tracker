@@ -705,6 +705,14 @@
       "weight": 60,
       "time1": 72,
       "time2": 52
+    },
+    {
+      "date": "2026-02-20",
+      "workout": "C",
+      "exercise": "Pullover",
+      "weight": 30,
+      "time1": 64,
+      "time2": 63
     }
   ],
   "workoutDurations": {
