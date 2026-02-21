@@ -9,14 +9,18 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #000; min-height: 100vh; padding: 16px; color: #fff; }
-        .container { max-width: 480px; margin: 0 auto; background: linear-gradient(145deg, #1d1d1f 0%, #121212 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%); color: #fff; padding: 28px 24px 24px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .container { max-width: 480px; margin: 0 auto; background: linear-gradient(145deg, #1d1d1f 0%, #121212 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%); color: #fff; padding: 28px 24px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
-        .header p { font-size: 13px; color: rgba(255, 255, 255, 0.5); }
-        .header a { display: inline-block; margin-top: 8px; color: rgba(255, 255, 255, 0.6); font-size: 13px; text-decoration: none; }
-        .workout-selector { display: flex; background: rgba(255, 255, 255, 0.08); padding: 8px; gap: 6px; }
-        .workout-btn { flex: 1; padding: 14px 10px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
-        .workout-btn.active { background: rgba(255, 255, 255, 0.12); color: #fff; }
+        .header p { font-size: 13px; color: rgba(255,255,255,0.5); }
+        .header-nav { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .header-nav a { color: rgba(255,255,255,0.5); font-size: 13px; text-decoration: none; padding: 4px 10px; border-radius: 6px; transition: all 0.2s; }
+        .header-nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .header-nav a.active { color: #fff; }
+        .workout-selector { display: flex; background: rgba(255,255,255,0.08); padding: 8px; gap: 6px; }
+        .workout-btn { flex: 1; padding: 14px 10px; border: none; background: transparent; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+        .workout-btn.active { background: rgba(255,255,255,0.12); color: #fff; }
+        .coaching-bar { background: rgba(255,149,0,0.12); border-bottom: 1px solid rgba(255,149,0,0.2); padding: 10px 16px; text-align: center; font-size: 13px; color: rgba(255,180,50,0.9); font-weight: 500; letter-spacing: 0.01em; }
         .content { padding: 16px; }
         .exercise-card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 12px; color: #1d1d1f; }
         .exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -24,18 +28,18 @@
         .ready-badge { background: linear-gradient(135deg, #34a853 0%, #2d9648 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .maintain-badge { background: linear-gradient(135deg, #ff9500 0%, #f57c00 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-        .weight-label { font-size: 15px; font-weight: 500; color: rgba(60, 60, 67, 0.8); }
-        .weight-input { width: 80px; padding: 10px; border: 1.5px solid rgba(0, 0, 0, 0.12); background: #fff; border-radius: 8px; font-size: 17px; font-weight: 600; color: #1d1d1f; text-align: center; }
-        .weight-input::placeholder { color: rgba(60, 60, 67, 0.4); font-weight: 400; }
+        .weight-label { font-size: 15px; font-weight: 500; color: rgba(60,60,67,0.8); }
+        .weight-input { width: 80px; padding: 10px; border: 1.5px solid rgba(0,0,0,0.12); background: #fff; border-radius: 8px; font-size: 17px; font-weight: 600; color: #1d1d1f; text-align: center; }
+        .weight-input::placeholder { color: rgba(60,60,67,0.4); font-weight: 400; }
         .weight-input:focus { outline: none; border-color: #1d1d1f; }
         .sets-container { display: flex; gap: 12px; }
         .set-box { flex: 1; background: #f5f5f7; border-radius: 12px; padding: 14px; text-align: center; }
-        .set-label { font-size: 13px; font-weight: 600; color: rgba(60, 60, 67, 0.6); margin-bottom: 10px; }
+        .set-label { font-size: 13px; font-weight: 600; color: rgba(60,60,67,0.6); margin-bottom: 10px; }
         .set-row { margin-bottom: 14px; }
-        .set-row-label { font-size: 14px; font-weight: 600; color: rgba(60, 60, 67, 0.7); margin-bottom: 8px; }
+        .set-row-label { font-size: 14px; font-weight: 600; color: rgba(60,60,67,0.7); margin-bottom: 8px; }
         .lr-container { display: flex; gap: 8px; }
         .lr-box { flex: 1; background: #f5f5f7; border-radius: 10px; padding: 12px 8px; text-align: center; }
-        .lr-label { font-size: 11px; font-weight: 600; color: rgba(60, 60, 67, 0.5); margin-bottom: 6px; text-transform: uppercase; }
+        .lr-label { font-size: 11px; font-weight: 600; color: rgba(60,60,67,0.5); margin-bottom: 6px; text-transform: uppercase; }
         .timer-display { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 10px; color: #1d1d1f; }
         .timer-display.small { font-size: 32px; }
         .timer-display.countdown { color: #ff9500; }
@@ -47,26 +51,54 @@
         .timer-btn.stop { background: #ff3b30; color: #fff; }
         .timer-btn.completed { background: #e0e0e0; color: #666; }
         .timer-btn:active:not(:disabled) { transform: scale(0.98); }
-        .rest-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        .rest-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
         .rest-overlay.show { display: flex; }
-        .rest-title { font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 20px; }
+        .rest-title { font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+        .rest-next { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 20px; }
         .rest-timer { font-size: 72px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
-        .rest-skip { margin-top: 40px; padding: 16px 48px; background: rgba(255, 255, 255, 0.1); border: none; border-radius: 12px; color: #fff; font-size: 17px; font-weight: 600; cursor: pointer; }
-        .history-section { padding: 16px; background: rgba(255, 255, 255, 0.05); border-radius: 0 0 24px 24px; }
+        .rest-skip { margin-top: 40px; padding: 16px 48px; background: rgba(255,255,255,0.1); border: none; border-radius: 12px; color: #fff; font-size: 17px; font-weight: 600; cursor: pointer; }
+        .review-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.97); z-index: 2000; overflow-y: auto; padding: 32px 20px 40px; }
+        .review-overlay.show { display: block; }
+        .review-inner { max-width: 480px; margin: 0 auto; }
+        .review-header { text-align: center; margin-bottom: 24px; }
+        .review-header h2 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .review-header p { font-size: 14px; color: rgba(255,255,255,0.5); }
+        .review-summary { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center; }
+        .review-summary-item .val { font-size: 28px; font-weight: 700; color: #fff; }
+        .review-summary-item .lbl { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+        .review-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+        .review-exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .review-exercise { font-size: 16px; font-weight: 600; color: #fff; }
+        .review-verdict { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 5px; }
+        .review-verdict.increase { background: rgba(52,168,83,0.15); color: #34a853; }
+        .review-verdict.maintain { background: rgba(255,149,0,0.15); color: #ff9500; }
+        .review-verdict.deload { background: rgba(255,59,48,0.15); color: #ff3b30; }
+        .review-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .review-row:last-child { border-bottom: none; }
+        .review-label { color: rgba(255,255,255,0.5); }
+        .review-value { color: #fff; font-weight: 600; }
+        .review-tut { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+        .review-tut-label { font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
+        .review-tut-value { font-size: 20px; font-weight: 700; }
+        .review-tut-value.increase { color: #34a853; }
+        .review-tut-value.maintain { color: #ff9500; }
+        .review-tut-value.deload { color: #ff3b30; }
+        .review-done-btn { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 14px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+        .history-section { padding: 16px; background: rgba(255,255,255,0.05); border-radius: 0 0 24px 24px; }
         .history-title { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 12px; }
-        .history-content { font-size: 13px; color: rgba(255, 255, 255, 0.7); white-space: pre-line; line-height: 1.6; }
+        .history-content { font-size: 13px; color: rgba(255,255,255,0.7); white-space: pre-line; line-height: 1.6; }
         .history-date { color: #fff; font-weight: 600; }
-        .history-duration { color: rgba(255, 255, 255, 0.5); font-size: 12px; }
-        .history-edit-icon { color: rgba(255, 255, 255, 0.4); font-size: 11px; margin-left: 8px; cursor: pointer; }
-        .history-edit-icon:hover { color: rgba(255, 255, 255, 0.7); }
+        .history-duration { color: rgba(255,255,255,0.5); font-size: 12px; }
+        .history-edit-icon { color: rgba(255,255,255,0.4); font-size: 11px; margin-left: 8px; cursor: pointer; }
+        .history-edit-icon:hover { color: rgba(255,255,255,0.7); }
         .history-edit-container { display: none; margin: 8px 0; }
         .history-edit-container.show { display: block; }
-        .history-edit-textarea { width: 100%; min-height: 100px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #fff; font-family: monospace; font-size: 12px; padding: 10px; resize: vertical; }
-        .history-edit-textarea:focus { outline: none; border-color: rgba(255, 255, 255, 0.4); }
+        .history-edit-textarea { width: 100%; min-height: 100px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-family: monospace; font-size: 12px; padding: 10px; resize: vertical; }
+        .history-edit-textarea:focus { outline: none; border-color: rgba(255,255,255,0.4); }
         .history-edit-buttons { display: flex; gap: 8px; margin-top: 8px; }
         .history-edit-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .history-edit-btn.save { background: #34a853; color: #fff; }
-        .history-edit-btn.cancel { background: rgba(255, 255, 255, 0.1); color: #fff; }
+        .history-edit-btn.cancel { background: rgba(255,255,255,0.1); color: #fff; }
     </style>
 </head>
 <body>
@@ -74,32 +106,58 @@
         <div class="header">
             <h1>Josh's Simple Gains</h1>
             <p>Target: 40-70 seconds per set</p>
-            <a href="settings.html">⚙️ Settings</a>
+            <div class="header-nav">
+                <a href="index.html" class="active">⏱ Timer</a>
+                <a href="gains.html">📈 Gains</a>
+                <a href="settings.html">⚙️ Settings</a>
+            </div>
         </div>
         <div class="workout-selector" id="workoutSelector"></div>
+        <div class="coaching-bar" id="coachingBar"></div>
         <div class="content" id="workoutContent"></div>
         <div class="history-section">
             <div class="history-title">History</div>
             <div class="history-content" id="historyContent"></div>
         </div>
     </div>
+
     <div class="rest-overlay" id="restOverlay">
         <div class="rest-title" id="restTitle">Rest</div>
+        <div class="rest-next" id="restNext"></div>
         <div class="rest-timer" id="restTimer">90</div>
         <button class="rest-skip" onclick="skipRest()">Skip</button>
     </div>
+
+    <div class="review-overlay" id="reviewOverlay">
+        <div class="review-inner">
+            <div class="review-header">
+                <h2>Workout Complete 💪</h2>
+                <p id="reviewDate"></p>
+            </div>
+            <div class="review-summary" id="reviewSummary"></div>
+            <div id="reviewCards"></div>
+            <button class="review-done-btn" onclick="closeReview()">Done</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initWorkoutData, saveWorkoutData } from './workoutData.js';
-        
+
         var workoutHistoryData = [];
         var workoutDurationsData = {};
-        
+
+        var coachingMessages = {
+            A: "Combined TUT target: >140s per exercise · 40-70s per set · Rest 60s same exercise, 90s between",
+            B: "Control the tempo — feel the muscle, not the weight · Combined TUT >140s = increase next session",
+            C: "Full range, slow negative · Both sets count toward combined TUT · Stay tight through the finish"
+        };
+
         var workouts = {
             A: { name: "Day A", label: "Mon", exercises: [
                 { name: "Incline Press", increment: 2.5 },
                 { name: "Chest-Supported Row", increment: 2.5 },
+                { name: "DB Shrugs", increment: 2.5 },
                 { name: "Pullover", increment: 2.5 },
-                { name: "Trap Bar Dead-Shrug", increment: 5 },
                 { name: "Lateral Raise", increment: 2.5 }
             ]},
             B: { name: "Day B", label: "Wed", exercises: [
@@ -117,18 +175,18 @@
                 { name: "DB Romanian Deadlift", increment: 2.5 }
             ]}
         };
+
         var currentWorkout = "A";
         var timers = {};
         var restInterval = null;
         var audioContext = null;
-        var workoutStartTime = null;
-        var pendingAutoStart = null;
-        
+
         function getAudioContext() {
             if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
             if (audioContext.state === "suspended") { audioContext.resume(); }
             return audioContext;
         }
+
         function beep(frequency, duration, count) {
             if (count === undefined) count = 1;
             var ctx = getAudioContext();
@@ -152,13 +210,12 @@
             var data = await initWorkoutData();
             workoutHistoryData = data.workoutHistory || [];
             workoutDurationsData = data.workoutDurations || {};
-            
             renderWorkoutSelector();
             loadWorkout(currentWorkout);
             document.body.addEventListener("touchstart", function() { getAudioContext(); }, { once: true });
             document.body.addEventListener("click", function() { getAudioContext(); }, { once: true });
         }
-        
+
         function renderWorkoutSelector() {
             var selector = document.getElementById("workoutSelector");
             var html = "";
@@ -168,7 +225,7 @@
             }
             selector.innerHTML = html;
         }
-        
+
         function loadWorkout(workoutKey) {
             currentWorkout = workoutKey;
             var workout = workouts[workoutKey];
@@ -180,12 +237,13 @@
             for (var i = 0; i < btns.length; i++) {
                 btns[i].classList.toggle("active", keys[i] === workoutKey);
             }
+            document.getElementById("coachingBar").textContent = coachingMessages[workoutKey];
             var html = "";
             for (var idx = 0; idx < workout.exercises.length; idx++) {
                 var exercise = workout.exercises[idx];
                 var lastEntry = null;
-                var filtered = history.filter(function(h) { 
-                    return h.exercise === exercise.name && h.workout === workoutKey && h.date !== today; 
+                var filtered = history.filter(function(h) {
+                    return h.exercise === exercise.name && h.workout === workoutKey && h.date !== today;
                 });
                 filtered.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
                 if (filtered.length > 0) lastEntry = filtered[0];
@@ -199,7 +257,6 @@
                     } else {
                         combinedTUT = lastEntry.time1 + lastEntry.time2;
                     }
-                    
                     if (combinedTUT > 140) {
                         suggestedWeight = lastEntry.weight + exercise.increment;
                         showNewWeight = true;
@@ -208,8 +265,8 @@
                         showMaintain = true;
                     }
                 }
-                var todayEntry = history.find(function(h) { 
-                    return h.exercise === exercise.name && h.workout === workoutKey && h.date === today; 
+                var todayEntry = history.find(function(h) {
+                    return h.exercise === exercise.name && h.workout === workoutKey && h.date === today;
                 });
                 if (exercise.unilateral) {
                     html += renderUnilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry);
@@ -218,29 +275,25 @@
                 }
             }
             content.innerHTML = html;
-            for (var idx = 0; idx < workout.exercises.length; idx++) {
-                var exercise = workout.exercises[idx];
-                if (exercise.unilateral) {
-                    updateGoButton(idx, "1L"); updateGoButton(idx, "1R"); updateGoButton(idx, "2L"); updateGoButton(idx, "2R");
+            for (var idx2 = 0; idx2 < workout.exercises.length; idx2++) {
+                var ex2 = workout.exercises[idx2];
+                if (ex2.unilateral) {
+                    updateGoButton(idx2, "1L"); updateGoButton(idx2, "1R");
+                    updateGoButton(idx2, "2L"); updateGoButton(idx2, "2R");
                 } else {
-                    updateGoButton(idx, 1); updateGoButton(idx, 2);
+                    updateGoButton(idx2, 1); updateGoButton(idx2, 2);
                 }
             }
             renderHistory();
         }
-        
+
         function renderBilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry) {
             var badge = "";
-            if (showNewWeight && !todayEntry) {
-                badge = "<div class=\"ready-badge\">New Weight</div>";
-            } else if (showMaintain && !todayEntry) {
-                badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
-            }
+            if (showNewWeight && !todayEntry) badge = "<div class=\"ready-badge\">New Weight</div>";
+            else if (showMaintain && !todayEntry) badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
             var weightVal = todayEntry ? todayEntry.weight : suggestedWeight;
             var disabled = todayEntry ? "disabled" : "";
             var btnClass = todayEntry ? "completed" : "go";
-            var btn1Text = todayEntry ? "Completed" : "Enter Weight";
-            var btn2Text = todayEntry ? "Completed" : "Enter Weight";
             var time1 = todayEntry ? formatTime(todayEntry.time1) : "00:00";
             var time2 = todayEntry ? formatTime(todayEntry.time2) : "00:00";
             var btn2Disabled = todayEntry ? "disabled" : "disabled";
@@ -248,18 +301,15 @@
                 "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + badge + "</div>" +
                 "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span><input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" placeholder=\"lbs\" value=\"" + weightVal + "\" oninput=\"onWeightInput(" + idx + ")\" " + disabled + "></div>" +
                 "<div class=\"sets-container\">" +
-                "<div class=\"set-box\"><div class=\"set-label\">Set 1</div><div class=\"timer-display\" id=\"timer-" + idx + "-1\">" + time1 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-1\" onclick=\"handleTimer(" + idx + ", 1)\" " + disabled + ">" + btn1Text + "</button></div>" +
-                "<div class=\"set-box\"><div class=\"set-label\">Set 2</div><div class=\"timer-display\" id=\"timer-" + idx + "-2\">" + time2 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-2\" onclick=\"handleTimer(" + idx + ", 2)\" " + btn2Disabled + ">" + btn2Text + "</button></div>" +
+                "<div class=\"set-box\"><div class=\"set-label\">Set 1</div><div class=\"timer-display\" id=\"timer-" + idx + "-1\">" + time1 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-1\" onclick=\"handleTimer(" + idx + ", 1)\" " + disabled + ">" + (todayEntry ? "Completed" : "Enter Weight") + "</button></div>" +
+                "<div class=\"set-box\"><div class=\"set-label\">Set 2</div><div class=\"timer-display\" id=\"timer-" + idx + "-2\">" + time2 + "</div><button class=\"timer-btn " + btnClass + "\" id=\"btn-" + idx + "-2\" onclick=\"handleTimer(" + idx + ", 2)\" " + btn2Disabled + ">" + (todayEntry ? "Completed" : "Enter Weight") + "</button></div>" +
                 "</div></div>";
         }
-        
+
         function renderUnilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry) {
             var badge = "";
-            if (showNewWeight && !todayEntry) {
-                badge = "<div class=\"ready-badge\">New Weight</div>";
-            } else if (showMaintain && !todayEntry) {
-                badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
-            }
+            if (showNewWeight && !todayEntry) badge = "<div class=\"ready-badge\">New Weight</div>";
+            else if (showMaintain && !todayEntry) badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
             var weightVal = todayEntry ? todayEntry.weight : suggestedWeight;
             var disabled = todayEntry ? "disabled" : "";
             var btnClass = todayEntry ? "completed" : "go";
@@ -268,50 +318,41 @@
             var t1R = todayEntry ? formatTime(todayEntry.time1R) : "00:00";
             var t2L = todayEntry ? formatTime(todayEntry.time2L) : "00:00";
             var t2R = todayEntry ? formatTime(todayEntry.time2R) : "00:00";
-            var btn1RDisabled = todayEntry ? "disabled" : "disabled";
-            var btn2LDisabled = todayEntry ? "disabled" : "disabled";
-            var btn2RDisabled = todayEntry ? "disabled" : "disabled";
             return "<div class=\"exercise-card\" id=\"card-" + idx + "\" data-unilateral=\"true\">" +
                 "<div class=\"exercise-header\"><div class=\"exercise-title\">" + exercise.name + "</div>" + badge + "</div>" +
                 "<div class=\"weight-row\"><span class=\"weight-label\">Weight:</span><input type=\"number\" class=\"weight-input\" id=\"weight-" + idx + "\" placeholder=\"lbs\" value=\"" + weightVal + "\" oninput=\"onWeightInput(" + idx + ")\" " + disabled + "></div>" +
                 "<div class=\"set-row\"><div class=\"set-row-label\">Set 1</div><div class=\"lr-container\">" +
                 "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1L\">" + t1L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1L\" onclick=\"handleTimer(" + idx + ", '1L')\" " + disabled + ">" + btnText + "</button></div>" +
-                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1R\">" + t1R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1R\" onclick=\"handleTimer(" + idx + ", '1R')\" " + btn1RDisabled + ">" + btnText + "</button></div>" +
+                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-1R\">" + t1R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-1R\" onclick=\"handleTimer(" + idx + ", '1R')\" disabled>" + btnText + "</button></div>" +
                 "</div></div>" +
                 "<div class=\"set-row\"><div class=\"set-row-label\">Set 2</div><div class=\"lr-container\">" +
-                "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2L\">" + t2L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2L\" onclick=\"handleTimer(" + idx + ", '2L')\" " + btn2LDisabled + ">" + btnText + "</button></div>" +
-                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2R\">" + t2R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2R\" onclick=\"handleTimer(" + idx + ", '2R')\" " + btn2RDisabled + ">" + btnText + "</button></div>" +
+                "<div class=\"lr-box\"><div class=\"lr-label\">Left</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2L\">" + t2L + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2L\" onclick=\"handleTimer(" + idx + ", '2L')\" disabled>" + btnText + "</button></div>" +
+                "<div class=\"lr-box\"><div class=\"lr-label\">Right</div><div class=\"timer-display small\" id=\"timer-" + idx + "-2R\">" + t2R + "</div><button class=\"timer-btn small " + btnClass + "\" id=\"btn-" + idx + "-2R\" onclick=\"handleTimer(" + idx + ", '2R')\" disabled>" + btnText + "</button></div>" +
                 "</div></div></div>";
         }
-        
+
         function onWeightInput(exerciseIdx) {
-            var workout = workouts[currentWorkout];
-            var exercise = workout.exercises[exerciseIdx];
+            var exercise = workouts[currentWorkout].exercises[exerciseIdx];
             if (exercise.unilateral) {
-                updateGoButton(exerciseIdx, "1L");
-                updateGoButton(exerciseIdx, "1R");
-                updateGoButton(exerciseIdx, "2L");
-                updateGoButton(exerciseIdx, "2R");
+                updateGoButton(exerciseIdx, "1L"); updateGoButton(exerciseIdx, "1R");
+                updateGoButton(exerciseIdx, "2L"); updateGoButton(exerciseIdx, "2R");
             } else {
-                updateGoButton(exerciseIdx, 1);
-                updateGoButton(exerciseIdx, 2);
+                updateGoButton(exerciseIdx, 1); updateGoButton(exerciseIdx, 2);
             }
         }
-        
+
         function updateGoButton(exerciseIdx, setId) {
             var weightInput = document.getElementById("weight-" + exerciseIdx);
             var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
             if (!btn || btn.classList.contains("completed") || btn.classList.contains("stop")) return;
-            
             var isUnilateral = typeof setId === "string";
             var timerKey = exerciseIdx + "-" + setId;
             var hasActiveTimer = Object.keys(timers).length > 0;
             var isThisTimerActive = timers[timerKey] !== undefined;
-            
             if (hasActiveTimer && !isThisTimerActive) {
                 btn.disabled = true;
                 btn.textContent = "Wait...";
-            } else if (weightInput.value && parseFloat(weightInput.value) > 0) {
+            } else if (weightInput && weightInput.value && parseFloat(weightInput.value) > 0) {
                 btn.textContent = "Go";
                 btn.disabled = false;
             } else {
@@ -319,22 +360,15 @@
                 btn.disabled = true;
             }
         }
-        
+
         function handleTimer(exerciseIdx, setId) {
             var weightInput = document.getElementById("weight-" + exerciseIdx);
             var weight = parseFloat(weightInput.value);
-            if (!weight || weight <= 0) {
-                alert("Please enter a weight first!");
-                return;
-            }
+            if (!weight || weight <= 0) { alert("Please enter a weight first!"); return; }
             var timerKey = exerciseIdx + "-" + setId;
-            if (timers[timerKey]) {
-                stopTimer(exerciseIdx, setId);
-            } else {
-                startCountdown(exerciseIdx, setId);
-            }
+            if (timers[timerKey]) { stopTimer(exerciseIdx, setId); } else { startCountdown(exerciseIdx, setId); }
         }
-        
+
         function startCountdown(exerciseIdx, setId) {
             var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
             var display = document.getElementById("timer-" + exerciseIdx + "-" + setId);
@@ -360,7 +394,7 @@
                 }
             }, 1000);
         }
-        
+
         function startTimer(exerciseIdx, setId) {
             var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
             var display = document.getElementById("timer-" + exerciseIdx + "-" + setId);
@@ -382,11 +416,10 @@
             timers[timerKey] = { interval: interval, getSeconds: function() { return seconds; } };
             updateAllButtons();
         }
-        
+
         function stopTimer(exerciseIdx, setId) {
             var timerKey = exerciseIdx + "-" + setId;
             var timerObj = timers[timerKey];
-            var seconds = timerObj.getSeconds();
             clearInterval(timerObj.interval);
             delete timers[timerKey];
             var btn = document.getElementById("btn-" + exerciseIdx + "-" + setId);
@@ -395,121 +428,169 @@
             btn.classList.remove("stop");
             btn.classList.add("completed");
             btn.disabled = true;
-            var workout = workouts[currentWorkout];
-            var exercise = workout.exercises[exerciseIdx];
+            var exercise = workouts[currentWorkout].exercises[exerciseIdx];
             if (exercise.unilateral) {
-                if (setId === "1R") {
-                    showRestOverlay(60);
+                if (setId === "1L") {
+                    var b1R = document.getElementById("btn-" + exerciseIdx + "-1R");
+                    if (b1R) { b1R.disabled = false; b1R.textContent = "Go"; }
+                } else if (setId === "1R") {
+                    showRestOverlay(60, getNextHint(exerciseIdx, "2L"));
+                } else if (setId === "2L") {
+                    var b2R = document.getElementById("btn-" + exerciseIdx + "-2R");
+                    if (b2R) { b2R.disabled = false; b2R.textContent = "Go"; }
                 } else if (setId === "2R") {
                     saveUnilateralExercise(exerciseIdx);
-                    showRestOverlay(90);
+                    showRestOverlay(90, getNextHint(exerciseIdx + 1, null));
                 }
             } else {
-                if (setId === 2) {
+                if (setId === 1) {
+                    showRestOverlay(60, getNextHint(exerciseIdx, 2));
+                } else if (setId === 2) {
                     saveBilateralExercise(exerciseIdx);
+                    showRestOverlay(90, getNextHint(exerciseIdx + 1, null));
                 }
-                showRestOverlay(setId === 1 ? 60 : 90);
             }
             updateAllButtons();
         }
-        
+
+        function getNextHint(nextIdx, setId) {
+            var workout = workouts[currentWorkout];
+            if (setId === 2 || setId === "2L") return "Next: Set 2 · " + workout.exercises[nextIdx - 1].name;
+            if (nextIdx < workout.exercises.length) return "Next: " + workout.exercises[nextIdx].name;
+            return "Last exercise — finish strong";
+        }
+
         function updateAllButtons() {
             var workout = workouts[currentWorkout];
             for (var idx = 0; idx < workout.exercises.length; idx++) {
-                var exercise = workout.exercises[idx];
-                if (exercise.unilateral) {
-                    updateGoButton(idx, "1L");
-                    updateGoButton(idx, "1R");
-                    updateGoButton(idx, "2L");
-                    updateGoButton(idx, "2R");
+                var ex = workout.exercises[idx];
+                if (ex.unilateral) {
+                    updateGoButton(idx, "1L"); updateGoButton(idx, "1R");
+                    updateGoButton(idx, "2L"); updateGoButton(idx, "2R");
                 } else {
-                    updateGoButton(idx, 1);
-                    updateGoButton(idx, 2);
+                    updateGoButton(idx, 1); updateGoButton(idx, 2);
                 }
             }
         }
-        
+
         function saveBilateralExercise(exerciseIdx) {
-            var workout = workouts[currentWorkout];
-            var exercise = workout.exercises[exerciseIdx];
+            var exercise = workouts[currentWorkout].exercises[exerciseIdx];
             var weight = parseFloat(document.getElementById("weight-" + exerciseIdx).value) || 0;
             var time1 = parseTime(document.getElementById("timer-" + exerciseIdx + "-1").textContent);
             var time2 = parseTime(document.getElementById("timer-" + exerciseIdx + "-2").textContent);
-            var entry = {
-                date: new Date().toISOString().split("T")[0],
-                workout: currentWorkout,
-                exercise: exercise.name,
-                weight: weight,
-                time1: time1,
-                time2: time2
-            };
-            saveToHistory(entry);
+            saveToHistory({ date: new Date().toISOString().split("T")[0], workout: currentWorkout, exercise: exercise.name, weight: weight, time1: time1, time2: time2 });
         }
-        
+
         function saveUnilateralExercise(exerciseIdx) {
-            var workout = workouts[currentWorkout];
-            var exercise = workout.exercises[exerciseIdx];
+            var exercise = workouts[currentWorkout].exercises[exerciseIdx];
             var weight = parseFloat(document.getElementById("weight-" + exerciseIdx).value) || 0;
-            var time1L = parseTime(document.getElementById("timer-" + exerciseIdx + "-1L").textContent);
-            var time1R = parseTime(document.getElementById("timer-" + exerciseIdx + "-1R").textContent);
-            var time2L = parseTime(document.getElementById("timer-" + exerciseIdx + "-2L").textContent);
-            var time2R = parseTime(document.getElementById("timer-" + exerciseIdx + "-2R").textContent);
-            var entry = {
-                date: new Date().toISOString().split("T")[0],
-                workout: currentWorkout,
-                exercise: exercise.name,
-                weight: weight,
-                time1L: time1L,
-                time1R: time1R,
-                time2L: time2L,
-                time2R: time2R,
+            saveToHistory({
+                date: new Date().toISOString().split("T")[0], workout: currentWorkout, exercise: exercise.name, weight: weight,
+                time1L: parseTime(document.getElementById("timer-" + exerciseIdx + "-1L").textContent),
+                time1R: parseTime(document.getElementById("timer-" + exerciseIdx + "-1R").textContent),
+                time2L: parseTime(document.getElementById("timer-" + exerciseIdx + "-2L").textContent),
+                time2R: parseTime(document.getElementById("timer-" + exerciseIdx + "-2R").textContent),
                 unilateral: true
-            };
-            saveToHistory(entry);
+            });
         }
-        
+
         function saveToHistory(entry) {
-            var history = workoutHistoryData;
-            var filtered = history.filter(function(h) { 
-                return !(h.exercise === entry.exercise && h.workout === entry.workout && h.date === entry.date); 
+            var filtered = workoutHistoryData.filter(function(h) {
+                return !(h.exercise === entry.exercise && h.workout === entry.workout && h.date === entry.date);
             });
             filtered.push(entry);
             workoutHistoryData = filtered;
             saveWorkoutDataToGitHub();
             renderHistory();
+            checkWorkoutComplete();
         }
-        
+
+        function checkWorkoutComplete() {
+            var workout = workouts[currentWorkout];
+            var today = new Date().toISOString().split("T")[0];
+            var allDone = workout.exercises.every(function(ex) {
+                return workoutHistoryData.some(function(h) {
+                    return h.exercise === ex.name && h.workout === currentWorkout && h.date === today;
+                });
+            });
+            if (allDone) { setTimeout(showReview, 1200); }
+        }
+
+        function showReview() {
+            var workout = workouts[currentWorkout];
+            var today = new Date().toISOString().split("T")[0];
+            var dateStr = new Date(today + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+            var totalTUT = 0;
+            var increaseCount = 0;
+            var cardsHtml = "";
+            workout.exercises.forEach(function(ex) {
+                var entry = workoutHistoryData.find(function(h) {
+                    return h.exercise === ex.name && h.workout === currentWorkout && h.date === today;
+                });
+                if (!entry) return;
+                var combined = 0;
+                var setsHtml = "";
+                if (ex.unilateral) {
+                    combined = (entry.time1L + entry.time1R + entry.time2L + entry.time2R) / 2;
+                    setsHtml = "<div class=\"review-row\"><span class=\"review-label\">Set 1 L / R</span><span class=\"review-value\">" + entry.time1L + "s / " + entry.time1R + "s</span></div>" +
+                               "<div class=\"review-row\"><span class=\"review-label\">Set 2 L / R</span><span class=\"review-value\">" + entry.time2L + "s / " + entry.time2R + "s</span></div>";
+                } else {
+                    combined = entry.time1 + entry.time2;
+                    setsHtml = "<div class=\"review-row\"><span class=\"review-label\">Set 1</span><span class=\"review-value\">" + entry.time1 + "s</span></div>" +
+                               "<div class=\"review-row\"><span class=\"review-label\">Set 2</span><span class=\"review-value\">" + entry.time2 + "s</span></div>";
+                }
+                totalTUT += combined;
+                var verdict, cls;
+                if (combined > 140) { verdict = "Increase"; cls = "increase"; increaseCount++; }
+                else if (combined >= 80) { verdict = "Maintain"; cls = "maintain"; }
+                else { verdict = "Deload"; cls = "deload"; }
+                cardsHtml += "<div class=\"review-card\">" +
+                    "<div class=\"review-exercise-header\"><div class=\"review-exercise\">" + ex.name + "</div><span class=\"review-verdict " + cls + "\">" + verdict + "</span></div>" +
+                    "<div class=\"review-row\"><span class=\"review-label\">Weight</span><span class=\"review-value\">" + entry.weight + " lbs</span></div>" +
+                    setsHtml +
+                    "<div class=\"review-tut\"><span class=\"review-tut-label\">Combined TUT</span><span class=\"review-tut-value " + cls + "\">" + Math.round(combined) + "s</span></div>" +
+                    "</div>";
+            });
+            document.getElementById("reviewDate").textContent = dateStr + " · Day " + currentWorkout;
+            document.getElementById("reviewSummary").innerHTML =
+                "<div class=\"review-summary-item\"><div class=\"val\">" + workout.exercises.length + "</div><div class=\"lbl\">Exercises</div></div>" +
+                "<div class=\"review-summary-item\"><div class=\"val\">" + Math.round(totalTUT) + "s</div><div class=\"lbl\">Total TUT</div></div>" +
+                "<div class=\"review-summary-item\"><div class=\"val\">" + increaseCount + "</div><div class=\"lbl\">Flagged ↑</div></div>";
+            document.getElementById("reviewCards").innerHTML = cardsHtml;
+            document.getElementById("reviewOverlay").classList.add("show");
+        }
+
+        function closeReview() { document.getElementById("reviewOverlay").classList.remove("show"); }
+
         function parseTime(timeStr) {
+            if (!timeStr || !timeStr.includes(":")) return 0;
             var parts = timeStr.split(":");
             return parseInt(parts[0]) * 60 + parseInt(parts[1]);
         }
-        
-        function showRestOverlay(restSeconds) {
+
+        function showRestOverlay(restSeconds, nextHint) {
             var overlay = document.getElementById("restOverlay");
-            var timerDisplay = document.getElementById("restTimer");
+            document.getElementById("restNext").textContent = nextHint || "";
             overlay.classList.add("show");
-            timerDisplay.textContent = restSeconds;
+            document.getElementById("restTimer").textContent = restSeconds;
             restInterval = setInterval(function() {
                 restSeconds--;
-                timerDisplay.textContent = restSeconds;
-                if (restSeconds <= 0) {
-                    skipRest();
-                    beep(800, 200, 2);
-                }
+                document.getElementById("restTimer").textContent = restSeconds;
+                if (restSeconds <= 0) { skipRest(); beep(800, 200, 2); }
             }, 1000);
         }
-        
+
         function skipRest() {
             clearInterval(restInterval);
             document.getElementById("restOverlay").classList.remove("show");
         }
-        
+
         function formatTime(seconds) {
             var mins = Math.floor(seconds / 60);
             var secs = seconds % 60;
             return (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
         }
-        
+
         function renderHistory() {
             var historyContent = document.getElementById("historyContent");
             var history = workoutHistoryData;
@@ -528,10 +609,8 @@
                 var dateStr = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
                 var key = date + "-" + currentWorkout;
                 var durationStr = durations[key] ? " <span class=\"history-duration\">(" + durations[key] + " min)</span>" : "";
-                
                 html += "<span class=\"history-date\">" + dateStr + "</span>" + durationStr;
                 html += "<span class=\"history-edit-icon\" onclick=\"toggleHistoryEdit('" + key + "')\">✏️</span>\n";
-                
                 var editText = "";
                 byDate[date].forEach(function(entry) {
                     if (entry.unilateral) {
@@ -542,97 +621,64 @@
                         editText += entry.exercise + ": " + entry.weight + "lb → " + entry.time1 + "s, " + entry.time2 + "s\n";
                     }
                 });
-                
                 html += "<div class=\"history-edit-container\" id=\"edit-" + key + "\">";
                 html += "<textarea class=\"history-edit-textarea\" id=\"textarea-" + key + "\">" + editText.trim() + "</textarea>";
                 html += "<div class=\"history-edit-buttons\">";
                 html += "<button class=\"history-edit-btn cancel\" onclick=\"toggleHistoryEdit('" + key + "')\">Cancel</button>";
                 html += "<button class=\"history-edit-btn save\" onclick=\"saveHistoryEdit('" + key + "')\">Save</button>";
                 html += "</div></div>";
-                
                 if (i < dates.length - 1) html += "\n";
             });
             historyContent.innerHTML = html || "No history yet";
         }
-        
+
         function saveWorkoutDataToGitHub() {
-            saveWorkoutData({
-                workoutHistory: workoutHistoryData,
-                workoutDurations: workoutDurationsData
-            }).catch(function(err) {
-                console.error("GitHub sync failed:", err);
-            });
+            saveWorkoutData({ workoutHistory: workoutHistoryData, workoutDurations: workoutDurationsData })
+                .catch(function(err) { console.error("GitHub sync failed:", err); });
         }
-        
+
         function toggleHistoryEdit(key) {
             var container = document.getElementById("edit-" + key);
-            if (container) {
-                container.classList.toggle("show");
-            }
+            if (container) container.classList.toggle("show");
         }
-        
+
         function saveHistoryEdit(key) {
             var textarea = document.getElementById("textarea-" + key);
             var text = textarea.value.trim();
             var lines = text.split("\n");
-            
             var parts = key.split("-");
             var date = parts.slice(0, 3).join("-");
             var workout = parts[3];
-            
-            var history = workoutHistoryData;
-            history = history.filter(function(h) {
-                return !(h.date === date && h.workout === workout);
-            });
-            
+            var history = workoutHistoryData.filter(function(h) { return !(h.date === date && h.workout === workout); });
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i].trim();
                 if (!line) continue;
-                
                 var match = line.match(/^(.+?):\s*(\d+(?:\.\d+)?)lb\s*→\s*(.+)$/);
                 if (!match) continue;
-                
-                var exerciseName = match[1].trim();
-                var weight = parseFloat(match[2]);
-                var timesStr = match[3];
-                var times = timesStr.split(",").map(function(t) { return parseInt(t.trim()) || 0; });
-                
-                var entry = {
-                    date: date,
-                    workout: workout,
-                    exercise: exerciseName,
-                    weight: weight
-                };
-                
+                var times = match[3].split(",").map(function(t) { return parseInt(t.trim()) || 0; });
+                var entry = { date: date, workout: workout, exercise: match[1].trim(), weight: parseFloat(match[2]) };
                 if (times.length === 4) {
-                    entry.time1L = times[0];
-                    entry.time1R = times[1];
-                    entry.time2L = times[2];
-                    entry.time2R = times[3];
-                    entry.unilateral = true;
+                    entry.time1L = times[0]; entry.time1R = times[1]; entry.time2L = times[2]; entry.time2R = times[3]; entry.unilateral = true;
                 } else if (times.length >= 2) {
-                    entry.time1 = times[0];
-                    entry.time2 = times[1];
+                    entry.time1 = times[0]; entry.time2 = times[1];
                 }
-                
                 history.push(entry);
             }
-            
             workoutHistoryData = history;
             saveWorkoutDataToGitHub();
-            
             toggleHistoryEdit(key);
             renderHistory();
             loadWorkout(currentWorkout);
         }
-        
+
         window.loadWorkout = loadWorkout;
         window.onWeightInput = onWeightInput;
         window.handleTimer = handleTimer;
         window.skipRest = skipRest;
         window.toggleHistoryEdit = toggleHistoryEdit;
         window.saveHistoryEdit = saveHistoryEdit;
-        
+        window.closeReview = closeReview;
+
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", initApp);
         } else {
