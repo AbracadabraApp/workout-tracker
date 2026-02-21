@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Josh's Simple Gains – Chart</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #000; min-height: 100vh; padding: 16px; color: #fff; }
+        .container { max-width: 480px; margin: 0 auto; background: linear-gradient(145deg, #1d1d1f 0%, #121212 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%); color: #fff; padding: 28px 24px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+        .header p { font-size: 13px; color: rgba(255,255,255,0.5); }
+        .header-nav { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .header-nav a { color: rgba(255,255,255,0.5); font-size: 13px; text-decoration: none; padding: 4px 10px; border-radius: 6px; transition: all 0.2s; }
+        .header-nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .header-nav a.active { color: #fff; }
+        .content { padding: 16px; }
+        .group-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .group-card { border-radius: 14px; pad rear ding: 14px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); }
+        .group-card.selected { border-color: var(--color); background: color-mix(in srgb, var(--color) 15%, transparent); }
+        .group-card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; color: var(--color); }
+        .group-card-pct { font-size: 24px; font-weight: 700; color: #fff; }
+        .group-card-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        .chart-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+        .chart-title { font-size: 14px; font-weight: 600; color: #ccc; margin-bottom: 16px; }
+        .chart-wrap { position: relative; height: 240px; }
+        .table-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .table-title { font-size: 14px; font-weight: 600; color: #ccc; margin-bottom: 14px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 6px 8px; color: rgba(255,255,255,0.5); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        th:not(:first-child) { text-align: right; }
+        td { padding: 9px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #ddd; }
+        td:not(:first-child) { text-align: right; }
+        td:last-child { font-weight: 600; }
+        .gain-pos { color: #34d399; }
+        .gain-zero { color: #888; }
+        .gain-neg { color: #f87171; }
+        .group-label { font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Josh's Simple Gains</h1>
+        <p>Dec 30 – Feb 20 · Weight progress by muscle group</p>
+        <div class="header-nav">
+            <a href="index.html">⏱ Timer</a>
+            <a href="gains.html" class="active">📈 Gains</a>
+            <a href="settings.html">⚙️ Settings</a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="group-cards" id="groupCards"></div>
+        <div class="chart-box">
+            <div class="chart-title" id="chartTitle">All Muscle Groups – % Gain Over Time</div>
+            <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+        </div>
+        <div class="table-box">
+            <div class="table-title">Exercise Breakdown</div>
+            <table>
+                <thead><tr><th>Exercise</th><th>Start</th><th>Current</th><th>Gain</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var workoutData = [
+        {date:"2025-12-30",exercise:"Incline Press",weight:40},
+        {date:"2025-12-30",exercise:"Chest-Supported Row",weight:20},
+        {date:"2025-12-30",exercise:"Pullover",weight:25},
+        {date:"2025-12-30",exercise:"Trap Bar Dead-Shrug",weight:75},
+        {date:"2025-12-30",exercise:"Lateral Raise",weight:20},
+        {date:"2026-01-02",exercise:"Overhead Press",weight:15},
+        {date:"2026-01-02",exercise:"Single-Arm Row",weight:25},
+        {date:"2026-01-02",exercise:"Pullover",weight:25},
+        {date:"2026-01-02",exercise:"Goblet Squat",weight:25},
+        {date:"2026-01-02",exercise:"Curl",weight:25},
+        {date:"2026-01-04",exercise:"Bench Press",weight:40},
+        {date:"2026-01-04",exercise:"Pullover",weight:10},
+        {date:"2026-01-04",exercise:"Reverse Fly",weight:15},
+        {date:"2026-01-04",exercise:"Skull Crusher",weight:25},
+        {date:"2026-01-04",exercise:"DB Romanian Deadlift",weight:35},
+        {date:"2026-01-05",exercise:"Incline Press",weight:45},
+        {date:"2026-01-05",exercise:"Chest-Supported Row",weight:22.5},
+        {date:"2026-01-05",exercise:"Pullover",weight:25},
+        {date:"2026-01-05",exercise:"Trap Bar Dead-Shrug",weight:75},
+        {date:"2026-01-05",exercise:"Lateral Raise",weight:20},
+        {date:"2026-01-07",exercise:"Overhead Press",weight:20},
+        {date:"2026-01-07",exercise:"Single-Arm Row",weight:25},
+        {date:"2026-01-07",exercise:"Pullover",weight:25},
+        {date:"2026-01-07",exercise:"Goblet Squat",weight:25},
+        {date:"2026-01-07",exercise:"Curl",weight:25},
+        {date:"2026-01-09",exercise:"Bench Press",weight:40},
+        {date:"2026-01-09",exercise:"Pullover",weight:20},
+        {date:"2026-01-09",exercise:"Skull Crusher",weight:25},
+        {date:"2026-01-09",exercise:"Reverse Fly",weight:15},
+        {date:"2026-01-09",exercise:"DB Romanian Deadlift",weight:35},
+        {date:"2026-01-12",exercise:"Incline Press",weight:45},
+        {date:"2026-01-12",exercise:"Chest-Supported Row",weight:22.5},
+        {date:"2026-01-12",exercise:"Pullover",weight:25},
+        {date:"2026-01-12",exercise:"Trap Bar Dead-Shrug",weight:75},
+        {date:"2026-01-12",exercise:"Lateral Raise",weight:20},
+        {date:"2026-01-14",exercise:"Overhead Press",weight:20},
+        {date:"2026-01-14",exercise:"Single-Arm Row",weight:25},
+        {date:"2026-01-14",exercise:"Pullover",weight:25},
+        {date:"2026-01-14",exercise:"Goblet Squat",weight:25},
+        {date:"2026-01-14",exercise:"Curl",weight:25},
+        {date:"2026-01-18",exercise:"Bench Press",weight:45},
+        {date:"2026-01-18",exercise:"Pullover",weight:25},
+        {date:"2026-01-18",exercise:"Skull Crusher",weight:25},
+        {date:"2026-01-18",exercise:"Reverse Fly",weight:20},
+        {date:"2026-01-18",exercise:"DB Romanian Deadlift",weight:40},
+        {date:"2026-01-20",exercise:"Incline Press",weight:45},
+        {date:"2026-01-20",exercise:"Chest-Supported Row",weight:45},
+        {date:"2026-01-20",exercise:"Pullover",weight:25},
+        {date:"2026-01-20",exercise:"Trap Bar Dead-Shrug",weight:95},
+        {date:"2026-01-20",exercise:"Lateral Raise",weight:20},
+        {date:"2026-01-21",exercise:"Overhead Press",weight:30},
+        {date:"2026-01-21",exercise:"Single-Arm Row",weight:25},
+        {date:"2026-01-21",exercise:"Pullover",weight:25},
+        {date:"2026-01-21",exercise:"Goblet Squat",weight:25},
+        {date:"2026-01-21",exercise:"Curl",weight:30},
+        {date:"2026-01-23",exercise:"DB Romanian Deadlift",weight:42.5},
+        {date:"2026-01-23",exercise:"Bench Press",weight:50},
+        {date:"2026-01-23",exercise:"Pullover",weight:30},
+        {date:"2026-01-23",exercise:"Skull Crusher",weight:25},
+        {date:"2026-01-23",exercise:"Reverse Fly",weight:20},
+        {date:"2026-01-27",exercise:"Incline Press",weight:45},
+        {date:"2026-01-27",exercise:"Chest-Supported Row",weight:45},
+        {date:"2026-01-27",exercise:"Pullover",weight:30},
+        {date:"2026-01-27",exercise:"Trap Bar Dead-Shrug",weight:95},
+        {date:"2026-01-27",exercise:"Lateral Raise",weight:20},
+        {date:"2026-01-28",exercise:"Overhead Press",weight:30},
+        {date:"2026-01-28",exercise:"Curl",weight:30},
+        {date:"2026-01-28",exercise:"Single-Arm Row",weight:30},
+        {date:"2026-01-28",exercise:"Pullover",weight:27.5},
+        {date:"2026-01-28",exercise:"Goblet Squat",weight:30},
+        {date:"2026-02-06",exercise:"Bench Press",weight:60},
+        {date:"2026-02-06",exercise:"Pullover",weight:30},
+        {date:"2026-02-06",exercise:"Skull Crusher",weight:25},
+        {date:"2026-02-06",exercise:"Reverse Fly",weight:25},
+        {date:"2026-02-06",exercise:"DB Romanian Deadlift",weight:60},
+        {date:"2026-02-07",exercise:"Incline Press",weight:45},
+        {date:"2026-02-07",exercise:"Chest-Supported Row",weight:45},
+        {date:"2026-02-07",exercise:"DB Shrugs",weight:60},
+        {date:"2026-02-07",exercise:"Lateral Raise",weight:20}
+    ];
+
+    var muscleGroups = {
+        "Chest":            { exercises: ["Bench Press","Incline Press"],                                              color: "#E8443A" },
+        "Back":             { exercises: ["Chest-Supported Row","Single-Arm Row","Pullover"],                          color: "#3B82F6" },
+        "Shoulders":        { exercises: ["Overhead Press","Lateral Raise","Reverse Fly"],                             color: "#F59E0B" },
+        "Arms":             { exercises: ["Curl","Skull Crusher"],                                                     color: "#10B981" },
+        "Legs & Posterior": { exercises: ["Goblet Squat","DB Romanian Deadlift","Trap Bar Dead-Shrug","DB Shrugs"],    color: "#8B5CF6" }
+    };
+
+    var firstWeight = {};
+    var dateExerciseWeight = {};
+    workoutData.forEach(function(d) {
+        dateExerciseWeight[d.date + "|" + d.exercise] = d.weight;
+        if (!firstWeight[d.exercise]) firstWeight[d.exercise] = d.weight;
+    });
+
+    var allDates = [];
+    workoutData.forEach(function(d) { if (allDates.indexOf(d.date) === -1) allDates.push(d.date); });
+    allDates.sort();
+
+    function buildGroupTimeline() {
+        var lastKnown = {};
+        return allDates.map(function(date) {
+            var row = { date: date.slice(5) };
+            workoutData.filter(function(d) { return d.date === date; }).forEach(function(d) { lastKnown[d.exercise] = d.weight; });
+            Object.keys(muscleGroups).forEach(function(group) {
+                var pcts = [];
+                muscleGroups[group].exercises.forEach(function(ex) {
+                    if (lastKnown[ex] !== undefined && firstWeight[ex]) {
+                        pcts.push((lastKnown[ex] - firstWeight[ex]) / firstWeight[ex] * 100);
+                    }
+                });
+                if (pcts.length) row[group] = Math.round(pcts.reduce(function(a,b){return a+b;},0) / pcts.length);
+            });
+            return row;
+        });
+    }
+
+    function buildExerciseTimeline(group) {
+        var exes = muscleGroups[group].exercises;
+        var lastKnown = {};
+        return allDates.map(function(date) {
+            var row = { date: date.slice(5) };
+            workoutData.filter(function(d) { return d.date === date; }).forEach(function(d) { lastKnown[d.exercise] = d.weight; });
+            exes.forEach(function(ex) { if (lastKnown[ex] !== undefined) row[ex] = lastKnown[ex]; });
+            return row;
+        });
+    }
+
+    var groupTimeline = buildGroupTimeline();
+    var lastRow = groupTimeline[groupTimeline.length - 1];
+    var selectedGroup = null;
+    var mainChart = null;
+
+    function renderCards() {
+        var html = "";
+        Object.keys(muscleGroups).forEach(function(group) {
+            var val = lastRow[group] || 0;
+            var color = muscleGroups[group].color;
+            html += "<div class=\"group-card" + (selectedGroup === group ? " selected" : "") + "\" style=\"--color:" + color + "\" onclick=\"selectGroup('" + group + "')\">" +
+                "<div class=\"group-card-label\">" + group + "</div>" +
+                "<div class=\"group-card-pct\">+" + val + "%</div>" +
+                "<div class=\"group-card-sub\">" + muscleGroups[group].exercises.length + " exercises</div>" +
+                "</div>";
+        });
+        document.getElementById("groupCards").innerHTML = html;
+    }
+
+    function selectGroup(group) {
+        selectedGroup = (selectedGroup === group) ? null : group;
+        renderCards();
+        renderChart();
+    }
+
+    function chartOptions(unit) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: "#aaa", font: { size: 12 }, boxWidth: 12 } },
+                tooltip: {
+                    backgroundColor: "#1a1a2e", borderColor: "rgba(255,255,255,0.1)", borderWidth: 1,
+                    titleColor: "#fff", bodyColor: "#ccc",
+                    callbacks: { label: function(ctx) { return ctx.dataset.label + ": " + ctx.parsed.y + unit; } }
+                }
+            },
+            scales: {
+                x: { ticks: { color: "#666", font: { size: 11 } }, grid: { color: "rgba(255,255,255,0.05)" } },
+                y: { ticks: { color: "#666", font: { size: 11 }, callback: function(v){return v+unit;} }, grid: { color: "rgba(255,255,255,0.05)" } }
+            }
+        };
+    }
+
+    function renderChart() {
+        var ctx = document.getElementById("mainChart").getContext("2d");
+        if (mainChart) mainChart.destroy();
+        var exColors = ["#E8443A","#3B82F6","#F59E0B","#10B981","#8B5CF6"];
+        if (selectedGroup) {
+            document.getElementById("chartTitle").textContent = selectedGroup + " – Weight Over Time (lbs)";
+            var data = buildExerciseTimeline(selectedGroup);
+            mainChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: data.map(function(r){return r.date;}),
+                    datasets: muscleGroups[selectedGroup].exercises.map(function(ex, i) {
+                        return { label: ex, data: data.map(function(r){return r[ex]!==undefined?r[ex]:null;}),
+                            borderColor: exColors[i%exColors.length], backgroundColor: exColors[i%exColors.length],
+                            tension: 0.3, spanGaps: true, pointRadius: 4, borderWidth: 2.5 };
+                    })
+                },
+                options: chartOptions(" lbs")
+            });
+        } else {
+            document.getElementById("chartTitle").textContent = "All Muscle Groups – % Gain Over Time";
+            mainChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: groupTimeline.map(function(r){return r.date;}),
+                    datasets: Object.keys(muscleGroups).map(function(group) {
+                        return { label: group, data: groupTimeline.map(function(r){return r[group]!==undefined?r[group]:null;}),
+                            borderColor: muscleGroups[group].color, backgroundColor: muscleGroups[group].color,
+                            tension: 0.3, spanGaps: true, pointRadius: 4, borderWidth: 2.5 };
+                    })
+                },
+                options: chartOptions("%")
+            });
+        }
+    }
+
+    function renderTable() {
+        var rows = "";
+        Object.keys(muscleGroups).forEach(function(group) {
+            var color = muscleGroups[group].color;
+            muscleGroups[group].exercises.forEach(function(ex, i) {
+                var records = workoutData.filter(function(d){ return d.exercise === ex; });
+                if (!records.length) return;
+                var start = records[0].weight;
+                var current = records[records.length-1].weight;
+                var pct = start > 0 ? Math.round((current - start) / start * 100) : 0;
+                var gainClass = pct > 0 ? "gain-pos" : pct === 0 ? "gain-zero" : "gain-neg";
+                rows += "<tr>" +
+                    "<td style=\"color:" + color + "\">" + (i === 0 ? "<span class=\"group-label\">" + group + " · </span>" : "") + ex + "</td>" +
+                    "<td>" + start + " lb</td><td>" + current + " lb</td>" +
+                    "<td class=\"" + gainClass + "\">" + (pct > 0 ? "+" : "") + pct + "%</td>" +
+                    "</tr>";
+            });
+        });
+        document.getElementById("tableBody").innerHTML = rows;
+    }
+
+    renderCards();
+    renderChart();
+    renderTable();
+</script>
+</body>
+</html>
