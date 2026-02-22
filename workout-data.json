@@ -753,6 +753,17 @@
       "weight": 35,
       "time1": 90,
       "time2": 85
+    },
+    {
+      "date": "2026-02-22",
+      "workout": "B",
+      "exercise": "Single-Arm Row",
+      "weight": 30,
+      "time1L": 67,
+      "time1R": 60,
+      "time2L": 46,
+      "time2R": 53,
+      "unilateral": true
     }
   ],
   "workoutDurations": {
