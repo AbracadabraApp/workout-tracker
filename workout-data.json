@@ -742,9 +742,17 @@
       "date": "2026-02-22",
       "workout": "B",
       "exercise": "Overhead Press",
-      "weight": 32.5,
+      "weight": 35,
       "time1": 63,
       "time2": 51
+    },
+    {
+      "date": "2026-02-22",
+      "workout": "B",
+      "exercise": "Curl",
+      "weight": 35,
+      "time1": 90,
+      "time2": 85
     }
   ],
   "workoutDurations": {
