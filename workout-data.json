@@ -764,6 +764,14 @@
       "time2L": 46,
       "time2R": 53,
       "unilateral": true
+    },
+    {
+      "date": "2026-02-22",
+      "workout": "B",
+      "exercise": "Pullover",
+      "weight": 32.5,
+      "time1": 78,
+      "time2": 67
     }
   ],
   "workoutDurations": {
