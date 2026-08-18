@@ -652,7 +652,7 @@
         window.saveHistoryEdit = saveHistoryEdit;
         
         if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", initApp);
+            document.addEventListene("DOMContentLoaded", initApp);
         } else {
             initApp();
         }
