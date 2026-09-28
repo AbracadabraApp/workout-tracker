@@ -72,6 +72,9 @@
         .history-edit-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .history-edit-btn.save { background: #34a853; color: #fff; }
         .history-edit-btn.cancel { background: rgba(255, 255, 255, 0.1); color: #fff; }
+        .sync-banner { display: none; align-items: center; gap: 10px; background: #4a3200; color: #ffd60a; padding: 10px 14px; font-size: 13px; font-weight: 500; }
+        .sync-banner a { color: #ffd60a; font-weight: 700; margin-left: auto; text-decoration: underline; }
+        .sync-banner button { background: transparent; border: none; color: #ffd60a; font-size: 16px; cursor: pointer; padding: 0 2px; }
     </style>
 </head>
 <body>
@@ -79,6 +82,11 @@
         <div class="header">
             <h1>Josh's Simple Gains</h1>
             <button class="voice-toggle" id="voiceToggle">&#128266; Voice</button>
+        </div>
+                <div class="sync-banner" id="syncBanner">
+            <span id="syncBannerText"></span>
+            <a href="settings.html">Settings</a>
+            <button onclick="dismissSyncBanner()" aria-label="Dismiss">&times;</button>
         </div>
         <div class="workout-selector" id="workoutSelector"></div>
         <div class="content" id="workoutContent"></div>
@@ -100,6 +108,7 @@
     </div>
     <script type="module">
         import { initWorkoutData, saveWorkoutData } from './workoutData.js';
+        import { loadToken } from './tokenStorage.js';
         
         var workoutHistoryData = [];
         var workoutDurationsData = {};
@@ -257,6 +266,7 @@
             renderWorkoutSelector();
             loadWorkout(currentWorkout);
             updateVoiceToggle();
+            if (!loadToken()) { updateSyncStatus(false, "No GitHub token set"); }
             document.body.addEventListener("touchstart", function() { getAudioContext(); primeSpeech(); }, { once: true });
             document.body.addEventListener("click", function() { getAudioContext(); primeSpeech(); }, { once: true });
             
@@ -714,12 +724,35 @@
             historyContent.innerHTML = html || "No history yet";
         }
         
+        function updateSyncStatus(ok, errorMsg) {
+            var banner = document.getElementById("syncBanner");
+            var text = document.getElementById("syncBannerText");
+            if (!banner || !text) return;
+            if (ok) {
+                banner.style.display = "none";
+            } else {
+                text.textContent = "GitHub sync off" + (errorMsg ? " \u2014 " + errorMsg : "") + ". Workouts save on this device only.";
+                banner.style.display = "flex";
+            }
+        }
+
+        function dismissSyncBanner() {
+            document.getElementById("syncBanner").style.display = "none";
+        }
+
         function saveWorkoutDataToGitHub() {
             saveWorkoutData({
                 workoutHistory: workoutHistoryData,
                 workoutDurations: workoutDurationsData
+            }).then(function(result) {
+                if (result && result.success) {
+                    updateSyncStatus(true);
+                } else {
+                    updateSyncStatus(false, result && result.error);
+                }
             }).catch(function(err) {
                 console.error("GitHub sync failed:", err);
+                updateSyncStatus(false, err && err.message);
             });
         }
         
@@ -789,6 +822,7 @@
         window.onWeightInput = onWeightInput;
         window.handleTimer = handleTimer;
         window.skipRest = skipRest;
+        window.dismissSyncBanner = dismissSyncBanner;
         window.toggleHistoryEdit = toggleHistoryEdit;
         window.saveHistoryEdit = saveHistoryEdit;
         
