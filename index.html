@@ -266,7 +266,7 @@
             renderWorkoutSelector();
             loadWorkout(currentWorkout);
             updateVoiceToggle();
-            if (!loadToken()) { updateSyncStatus(false, "No GitHub token set"); }
+            if (!loadToken()) { updateSyncStatus(false, "No app key set"); }
             document.body.addEventListener("touchstart", function() { getAudioContext(); primeSpeech(); }, { once: true });
             document.body.addEventListener("click", function() { getAudioContext(); primeSpeech(); }, { once: true });
             

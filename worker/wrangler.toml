@@ -1,0 +1,7 @@
+name = "gains-data"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Secrets are set via: npx wrangler secret put GITHUB_TOKEN
+# and: npx wrangler secret put APP_KEY
