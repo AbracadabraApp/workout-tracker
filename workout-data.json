@@ -812,6 +812,14 @@
       "weight": 40,
       "time1": 78,
       "time2": 58
+    },
+    {
+      "date": "2026-10-05",
+      "workout": "A",
+      "exercise": "Lateral Raise",
+      "weight": 20,
+      "time1": 105,
+      "time2": 92
     }
   ],
   "workoutDurations": {
