@@ -1,4 +1,4 @@
-# Josh's Simple Gains
+# Gains
 
 A personal HIT / time-under-tension workout timer. It's a static PWA on GitHub Pages:
 https://abracadabraapp.github.io/workout-tracker/#key=APP_KEY
