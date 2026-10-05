@@ -310,7 +310,7 @@
             var workout = workouts[workoutKey];
             var content = document.getElementById("workoutContent");
             var history = workoutHistoryData;
-            var today = new Date().toISOString().split("T")[0];
+            var today = new Date().toLocaleDateString("en-CA");
             var btns = document.querySelectorAll(".workout-btn");
             var keys = Object.keys(workouts);
             for (var i = 0; i < btns.length; i++) {
@@ -588,7 +588,7 @@
             var time1 = parseTime(document.getElementById("timer-" + exerciseIdx + "-1").textContent);
             var time2 = parseTime(document.getElementById("timer-" + exerciseIdx + "-2").textContent);
             var entry = {
-                date: new Date().toISOString().split("T")[0],
+                date: new Date().toLocaleDateString("en-CA"),
                 workout: currentWorkout,
                 exercise: exercise.name,
                 weight: weight,
@@ -607,7 +607,7 @@
             var time2L = parseTime(document.getElementById("timer-" + exerciseIdx + "-2L").textContent);
             var time2R = parseTime(document.getElementById("timer-" + exerciseIdx + "-2R").textContent);
             var entry = {
-                date: new Date().toISOString().split("T")[0],
+                date: new Date().toLocaleDateString("en-CA"),
                 workout: currentWorkout,
                 exercise: exercise.name,
                 weight: weight,
