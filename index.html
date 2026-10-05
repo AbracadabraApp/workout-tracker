@@ -12,6 +12,7 @@
         .container { max-width: 480px; margin: 0 auto; background: linear-gradient(145deg, #1d1d1f 0%, #121212 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); overflow: hidden; }
         .header { position: relative; background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%); color: #fff; padding: 28px 24px 24px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
         .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
+        .sync-status { font-size: 12px; color: rgba(255, 255, 255, 0.6); margin-top: 6px; font-weight: 500; }
         .voice-toggle { position: absolute; top: 14px; right: 14px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.85); border-radius: 999px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; }
         .voice-toggle.off { color: rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.04); }
         .workout-selector { display: flex; background: rgba(255, 255, 255, 0.08); padding: 8px; gap: 6px; }
@@ -82,11 +83,11 @@
     <div class="container">
         <div class="header">
             <h1>Josh's Simple Gains</h1>
+            <div class="sync-status" id="syncStatus"></div>
             <button class="voice-toggle" id="voiceToggle">&#128266; Voice</button>
         </div>
                 <div class="sync-banner" id="syncBanner">
             <span id="syncBannerText"></span>
-            <a href="settings.html">Settings</a>
             <button onclick="dismissSyncBanner()" aria-label="Dismiss">&times;</button>
         </div>
         <div class="workout-selector" id="workoutSelector"></div>
@@ -108,7 +109,7 @@
         <button class="rest-skip" onclick="skipRest()">Skip</button>
     </div>
     <script type="module">
-        import { initWorkoutData, saveWorkoutData } from './workoutData.js';
+        import { initWorkoutData, saveWorkoutData, getSyncStatus } from './workoutData.js';
         import { loadToken } from './tokenStorage.js';
         
         var workoutHistoryData = [];
@@ -267,6 +268,7 @@
             renderWorkoutSelector();
             loadWorkout(currentWorkout);
             updateVoiceToggle();
+            updateSyncStatusLine();
             if (!loadToken()) { updateSyncStatus(false, "No app key set"); }
             document.body.addEventListener("touchstart", function() { getAudioContext(); primeSpeech(); }, { once: true });
             document.body.addEventListener("click", function() { getAudioContext(); primeSpeech(); }, { once: true });
@@ -755,6 +757,38 @@
             document.getElementById("syncBanner").style.display = "none";
         }
 
+        function updateSyncStatusLine() {
+            var status = getSyncStatus();
+            var statusEl = document.getElementById("syncStatus");
+            if (!statusEl) return;
+
+            if (status.pending) {
+                statusEl.textContent = "Not synced, saved on this phone";
+            } else if (status.lastSync) {
+                var syncDate = new Date(status.lastSync);
+                var now = new Date();
+                var diffMs = now - syncDate;
+                var diffMins = Math.floor(diffMs / 60000);
+                var diffHours = Math.floor(diffMs / 3600000);
+                var diffDays = Math.floor(diffMs / 86400000);
+
+                var timeStr;
+                if (diffMins < 1) {
+                    timeStr = "just now";
+                } else if (diffMins < 60) {
+                    timeStr = diffMins + " min ago";
+                } else if (diffHours < 24) {
+                    timeStr = diffHours + " hour" + (diffHours > 1 ? "s" : "") + " ago";
+                } else {
+                    timeStr = diffDays + " day" + (diffDays > 1 ? "s" : "") + " ago";
+                }
+
+                statusEl.textContent = "Synced " + timeStr;
+            } else {
+                statusEl.textContent = "";
+            }
+        }
+
         function saveWorkoutDataToGitHub() {
             saveWorkoutData({
                 workoutHistory: workoutHistoryData,
@@ -765,9 +799,11 @@
                 } else {
                     updateSyncStatus(false, result && result.error);
                 }
+                updateSyncStatusLine();
             }).catch(function(err) {
                 console.error("GitHub sync failed:", err);
                 updateSyncStatus(false, err && err.message);
+                updateSyncStatusLine();
             });
         }
         
