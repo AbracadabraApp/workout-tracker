@@ -45,7 +45,7 @@
 <div class="container">
     <div class="header">
         <h1>Josh's Simple Gains</h1>
-        <p>Dec 30 – Feb 20 · Weight progress by muscle group</p>
+        <p id="rangeLabel">Loading…</p>
         <div class="header-nav">
             <a href="index.html">⏱ Timer</a>
             <a href="gains.html" class="active">📈 Gains</a>
@@ -69,87 +69,7 @@
 </div>
 
 <script>
-    var workoutData = [
-        {date:"2025-12-30",exercise:"Incline Press",weight:40},
-        {date:"2025-12-30",exercise:"Chest-Supported Row",weight:20},
-        {date:"2025-12-30",exercise:"Pullover",weight:25},
-        {date:"2025-12-30",exercise:"Trap Bar Dead-Shrug",weight:75},
-        {date:"2025-12-30",exercise:"Lateral Raise",weight:20},
-        {date:"2026-01-02",exercise:"Overhead Press",weight:15},
-        {date:"2026-01-02",exercise:"Single-Arm Row",weight:25},
-        {date:"2026-01-02",exercise:"Pullover",weight:25},
-        {date:"2026-01-02",exercise:"Goblet Squat",weight:25},
-        {date:"2026-01-02",exercise:"Curl",weight:25},
-        {date:"2026-01-04",exercise:"Bench Press",weight:40},
-        {date:"2026-01-04",exercise:"Pullover",weight:10},
-        {date:"2026-01-04",exercise:"Reverse Fly",weight:15},
-        {date:"2026-01-04",exercise:"Skull Crusher",weight:25},
-        {date:"2026-01-04",exercise:"DB Romanian Deadlift",weight:35},
-        {date:"2026-01-05",exercise:"Incline Press",weight:45},
-        {date:"2026-01-05",exercise:"Chest-Supported Row",weight:22.5},
-        {date:"2026-01-05",exercise:"Pullover",weight:25},
-        {date:"2026-01-05",exercise:"Trap Bar Dead-Shrug",weight:75},
-        {date:"2026-01-05",exercise:"Lateral Raise",weight:20},
-        {date:"2026-01-07",exercise:"Overhead Press",weight:20},
-        {date:"2026-01-07",exercise:"Single-Arm Row",weight:25},
-        {date:"2026-01-07",exercise:"Pullover",weight:25},
-        {date:"2026-01-07",exercise:"Goblet Squat",weight:25},
-        {date:"2026-01-07",exercise:"Curl",weight:25},
-        {date:"2026-01-09",exercise:"Bench Press",weight:40},
-        {date:"2026-01-09",exercise:"Pullover",weight:20},
-        {date:"2026-01-09",exercise:"Skull Crusher",weight:25},
-        {date:"2026-01-09",exercise:"Reverse Fly",weight:15},
-        {date:"2026-01-09",exercise:"DB Romanian Deadlift",weight:35},
-        {date:"2026-01-12",exercise:"Incline Press",weight:45},
-        {date:"2026-01-12",exercise:"Chest-Supported Row",weight:22.5},
-        {date:"2026-01-12",exercise:"Pullover",weight:25},
-        {date:"2026-01-12",exercise:"Trap Bar Dead-Shrug",weight:75},
-        {date:"2026-01-12",exercise:"Lateral Raise",weight:20},
-        {date:"2026-01-14",exercise:"Overhead Press",weight:20},
-        {date:"2026-01-14",exercise:"Single-Arm Row",weight:25},
-        {date:"2026-01-14",exercise:"Pullover",weight:25},
-        {date:"2026-01-14",exercise:"Goblet Squat",weight:25},
-        {date:"2026-01-14",exercise:"Curl",weight:25},
-        {date:"2026-01-18",exercise:"Bench Press",weight:45},
-        {date:"2026-01-18",exercise:"Pullover",weight:25},
-        {date:"2026-01-18",exercise:"Skull Crusher",weight:25},
-        {date:"2026-01-18",exercise:"Reverse Fly",weight:20},
-        {date:"2026-01-18",exercise:"DB Romanian Deadlift",weight:40},
-        {date:"2026-01-20",exercise:"Incline Press",weight:45},
-        {date:"2026-01-20",exercise:"Chest-Supported Row",weight:45},
-        {date:"2026-01-20",exercise:"Pullover",weight:25},
-        {date:"2026-01-20",exercise:"Trap Bar Dead-Shrug",weight:95},
-        {date:"2026-01-20",exercise:"Lateral Raise",weight:20},
-        {date:"2026-01-21",exercise:"Overhead Press",weight:30},
-        {date:"2026-01-21",exercise:"Single-Arm Row",weight:25},
-        {date:"2026-01-21",exercise:"Pullover",weight:25},
-        {date:"2026-01-21",exercise:"Goblet Squat",weight:25},
-        {date:"2026-01-21",exercise:"Curl",weight:30},
-        {date:"2026-01-23",exercise:"DB Romanian Deadlift",weight:42.5},
-        {date:"2026-01-23",exercise:"Bench Press",weight:50},
-        {date:"2026-01-23",exercise:"Pullover",weight:30},
-        {date:"2026-01-23",exercise:"Skull Crusher",weight:25},
-        {date:"2026-01-23",exercise:"Reverse Fly",weight:20},
-        {date:"2026-01-27",exercise:"Incline Press",weight:45},
-        {date:"2026-01-27",exercise:"Chest-Supported Row",weight:45},
-        {date:"2026-01-27",exercise:"Pullover",weight:30},
-        {date:"2026-01-27",exercise:"Trap Bar Dead-Shrug",weight:95},
-        {date:"2026-01-27",exercise:"Lateral Raise",weight:20},
-        {date:"2026-01-28",exercise:"Overhead Press",weight:30},
-        {date:"2026-01-28",exercise:"Curl",weight:30},
-        {date:"2026-01-28",exercise:"Single-Arm Row",weight:30},
-        {date:"2026-01-28",exercise:"Pullover",weight:27.5},
-        {date:"2026-01-28",exercise:"Goblet Squat",weight:30},
-        {date:"2026-02-06",exercise:"Bench Press",weight:60},
-        {date:"2026-02-06",exercise:"Pullover",weight:30},
-        {date:"2026-02-06",exercise:"Skull Crusher",weight:25},
-        {date:"2026-02-06",exercise:"Reverse Fly",weight:25},
-        {date:"2026-02-06",exercise:"DB Romanian Deadlift",weight:60},
-        {date:"2026-02-07",exercise:"Incline Press",weight:45},
-        {date:"2026-02-07",exercise:"Chest-Supported Row",weight:45},
-        {date:"2026-02-07",exercise:"DB Shrugs",weight:60},
-        {date:"2026-02-07",exercise:"Lateral Raise",weight:20}
-    ];
+function startGains(workoutData) {
 
     var muscleGroups = {
         "Chest":            { exercises: ["Bench Press","Incline Press"],                                              color: "#E8443A" },
@@ -303,6 +223,24 @@
     renderCards();
     renderChart();
     renderTable();
+    window.selectGroup = selectGroup;
+}
+</script>
+<script type="module">
+    import { initWorkoutData } from './workoutData.js';
+    var data = await initWorkoutData();
+    var rows = (data.workoutHistory || [])
+        .filter(function(h) { return h.date && h.exercise && h.weight > 0; })
+        .map(function(h) { return { date: h.date, exercise: h.exercise, weight: h.weight }; })
+        .sort(function(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    var fmt = function(d) { return new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); };
+    var sub = document.getElementById("rangeLabel");
+    if (rows.length) {
+        sub.textContent = fmt(rows[0].date) + " \u2013 " + fmt(rows[rows.length - 1].date) + " \u00b7 Weight progress by muscle group";
+        startGains(rows);
+    } else {
+        sub.textContent = "No workouts logged yet";
+    }
 </script>
 </body>
 </html>
