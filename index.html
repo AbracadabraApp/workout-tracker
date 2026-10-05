@@ -23,6 +23,7 @@
         .exercise-title { font-size: 22px; font-weight: 600; color: #1d1d1f; }
         .ready-badge { background: linear-gradient(135deg, #34a853 0%, #2d9648 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .maintain-badge { background: linear-gradient(135deg, #ff9500 0%, #f57c00 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .deload-badge { background: linear-gradient(135deg, #e5484d 0%, #c93a3f 100%); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .weight-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
         .weight-label { font-size: 15px; font-weight: 500; color: rgba(60, 60, 67, 0.8); }
         .weight-input { width: 80px; padding: 10px; border: 1.5px solid rgba(0, 0, 0, 0.12); background: #fff; border-radius: 8px; font-size: 17px; font-weight: 600; color: #1d1d1f; text-align: center; }
@@ -319,38 +320,41 @@
             var html = "";
             for (var idx = 0; idx < workout.exercises.length; idx++) {
                 var exercise = workout.exercises[idx];
-                var lastEntry = null;
-                var filtered = history.filter(function(h) { 
-                    return h.exercise === exercise.name && h.workout === workoutKey && h.date !== today; 
+                // Progress uses the most recent sessions of this exercise on ANY day,
+                // since some exercises (Pullover, RDL) appear on two days.
+                var prior = history.filter(function(h) {
+                    return h.exercise === exercise.name && h.date !== today;
                 });
-                filtered.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-                if (filtered.length > 0) lastEntry = filtered[0];
+                prior.sort(function(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+                var valid = prior.filter(function(h) { return entryTUT(h) !== null; });
+                var lastEntry = valid[0] || prior[0] || null;
                 var suggestedWeight = "";
-                var showNewWeight = false;
-                var showMaintain = false;
-                if (lastEntry) {
-                    var combinedTUT = 0;
-                    if (exercise.unilateral) {
-                        combinedTUT = (lastEntry.time1L + lastEntry.time1R + lastEntry.time2L + lastEntry.time2R) / 2;
+                var status = null;
+                if (valid.length) {
+                    var last = valid[0];
+                    var tut = entryTUT(last);
+                    suggestedWeight = last.weight;
+                    if (tut < 80) {
+                        status = "deload";
+                        suggestedWeight = Math.max(0, last.weight - exercise.increment);
+                    } else if (tut > 140 && valid[1] && valid[1].weight === last.weight && entryTUT(valid[1]) > 140) {
+                        status = "new";
+                        suggestedWeight = last.weight + exercise.increment;
+                    } else if (tut > 140) {
+                        status = "almost";
                     } else {
-                        combinedTUT = lastEntry.time1 + lastEntry.time2;
+                        status = "maintain";
                     }
-                    
-                    if (combinedTUT > 140) {
-                        suggestedWeight = lastEntry.weight + exercise.increment;
-                        showNewWeight = true;
-                    } else {
-                        suggestedWeight = lastEntry.weight;
-                        showMaintain = true;
-                    }
+                } else if (lastEntry) {
+                    suggestedWeight = lastEntry.weight;
                 }
                 var todayEntry = history.find(function(h) { 
                     return h.exercise === exercise.name && h.workout === workoutKey && h.date === today; 
                 });
                 if (exercise.unilateral) {
-                    html += renderUnilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry);
+                    html += renderUnilateralExercise(exercise, idx, suggestedWeight, status, todayEntry);
                 } else {
-                    html += renderBilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry);
+                    html += renderBilateralExercise(exercise, idx, suggestedWeight, status, todayEntry);
                 }
             }
             content.innerHTML = html;
@@ -365,13 +369,29 @@
             renderHistory();
         }
         
-        function renderBilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry) {
-            var badge = "";
-            if (showNewWeight && !todayEntry) {
-                badge = "<div class=\"ready-badge\">New Weight</div>";
-            } else if (showMaintain && !todayEntry) {
-                badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
+        // Combined TUT for a history entry, or null if any set is under 10s (skip / accidental tap).
+        function entryTUT(h) {
+            var sets = h.unilateral
+                ? [h.time1L, h.time1R, h.time2L, h.time2R]
+                : [h.time1, h.time2];
+            for (var i = 0; i < sets.length; i++) {
+                if (typeof sets[i] !== "number" || sets[i] < 10) return null;
             }
+            return h.unilateral
+                ? (h.time1L + h.time1R + h.time2L + h.time2R) / 2
+                : h.time1 + h.time2;
+        }
+
+        function progressBadge(status) {
+            if (status === "new") return "<div class=\"ready-badge\">New Weight</div>";
+            if (status === "deload") return "<div class=\"deload-badge\">Deload</div>";
+            if (status === "almost") return "<div class=\"maintain-badge\">Maintain \u00b7 1 more</div>";
+            if (status === "maintain") return "<div class=\"maintain-badge\">Maintain Weight</div>";
+            return "";
+        }
+
+        function renderBilateralExercise(exercise, idx, suggestedWeight, status, todayEntry) {
+            var badge = todayEntry ? "" : progressBadge(status);
             var weightVal = todayEntry ? todayEntry.weight : suggestedWeight;
             var disabled = todayEntry ? "disabled" : "";
             var btnClass = todayEntry ? "completed" : "go";
@@ -389,13 +409,8 @@
                 "</div></div>";
         }
         
-        function renderUnilateralExercise(exercise, idx, suggestedWeight, showNewWeight, showMaintain, todayEntry) {
-            var badge = "";
-            if (showNewWeight && !todayEntry) {
-                badge = "<div class=\"ready-badge\">New Weight</div>";
-            } else if (showMaintain && !todayEntry) {
-                badge = "<div class=\"maintain-badge\">Maintain Weight</div>";
-            }
+        function renderUnilateralExercise(exercise, idx, suggestedWeight, status, todayEntry) {
+            var badge = todayEntry ? "" : progressBadge(status);
             var weightVal = todayEntry ? todayEntry.weight : suggestedWeight;
             var disabled = todayEntry ? "disabled" : "";
             var btnClass = todayEntry ? "completed" : "go";
