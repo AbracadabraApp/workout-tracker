@@ -820,6 +820,14 @@
       "weight": 20,
       "time1": 105,
       "time2": 92
+    },
+    {
+      "date": "2026-10-08",
+      "workout": "B",
+      "exercise": "Arnold Press",
+      "weight": 20,
+      "time1": 0,
+      "time2": 65
     }
   ],
   "workoutDurations": {
