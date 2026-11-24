@@ -828,6 +828,14 @@
       "weight": 20,
       "time1": 0,
       "time2": 65
+    },
+    {
+      "date": "2026-11-24",
+      "workout": "A",
+      "exercise": "Incline Press",
+      "weight": 20,
+      "time1": 103,
+      "time2": 107
     }
   ],
   "workoutDurations": {
